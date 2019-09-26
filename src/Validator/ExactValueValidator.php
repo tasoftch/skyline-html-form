@@ -34,32 +34,20 @@
 
 namespace Skyline\HTML\Form\Validator;
 
+
 use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
 
-abstract class AbstractComparisonValidator extends AbstractConditionalValidator
+class ExactValueValidator extends AbstractComparisonValidator
 {
-    /** @var mixed */
-    private $comparisonValue;
-
-    public function __construct($comparisonValue, ConditionInterface $condition = NULL)
+    public function __construct($value, ConditionInterface $condition = NULL)
     {
-        parent::__construct($condition);
-        $this->comparisonValue = $comparisonValue;
+        parent::__construct($value, $condition);
     }
 
-    /**
-     * @return mixed
-     */
-    public function getComparisonValue()
-    {
-        return $this->comparisonValue;
-    }
+    public function getValue() { return $this->getComparisonValue(); }
 
-    /**
-     * @param mixed $comparisonValue
-     */
-    public function setComparisonValue($comparisonValue): void
+    public function validateValue($value)
     {
-        $this->comparisonValue = $comparisonValue;
+        return $value == $this->getValue() ? true : false;
     }
 }

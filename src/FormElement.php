@@ -39,6 +39,7 @@ use Skyline\HTML\ElementInterface;
 use Skyline\HTML\Form\Control\ControlInterface;
 use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
 use Skyline\HTML\Form\Exception\FormValidationException;
+use Skyline\HTML\Form\Style\StyleMapInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 class FormElement extends Element implements ElementInterface
@@ -65,6 +66,11 @@ class FormElement extends Element implements ElementInterface
     private $valid = false;
     private $validated = false;
     private $alwaysDisplayValidationFeedbacks = false;
+
+    /**
+     * @var StyleMapInterface|null
+     */
+    private $styleClassMap;
 
 
     public function __construct(string $actionName, string $method = 'POST', $identifier = NULL, bool $multipart = false)
@@ -184,12 +190,15 @@ class FormElement extends Element implements ElementInterface
         $valid = $this->valid = true;
         $this->validated = true;
 
-        $this["class"] = 'was-validated is-valid';
+        if($map = $this->getStyleClassMap())
+            $this["class"] = $map->getStyleClasses([ StyleMapInterface::FORM_VALIDATED_STYLE, StyleMapInterface::FORM_VALID_STYLE ]);
 
-        $invalidate = function(ControlInterface $element) use (&$list, &$valid ) {
+        $invalidate = function(ControlInterface $element) use (&$list, &$valid, $map ) {
             $valid = $this->valid = false;
             $list[ $element->getName() ] = $element;
-            $this->removeClass("is-valid");
+            if($map) {
+                $this["class"] = $map->getStyleClasses([ StyleMapInterface::FORM_VALIDATED_STYLE, StyleMapInterface::FORM_INVALID_STYLE ]);
+            }
         };
 
         foreach($this->getChildElements() as $element) {
@@ -279,6 +288,22 @@ class FormElement extends Element implements ElementInterface
     public function setAlwaysDisplayValidationFeedbacks(bool $alwaysDisplayValidationFeedbacks): void
     {
         $this->alwaysDisplayValidationFeedbacks = $alwaysDisplayValidationFeedbacks;
+    }
+
+    /**
+     * @return StyleMapInterface|null
+     */
+    public function getStyleClassMap(): ?StyleMapInterface
+    {
+        return $this->styleClassMap;
+    }
+
+    /**
+     * @param StyleMapInterface|null $styleClassMap
+     */
+    public function setStyleClassMap(?StyleMapInterface $styleClassMap): void
+    {
+        $this->styleClassMap = $styleClassMap;
     }
 
     /**

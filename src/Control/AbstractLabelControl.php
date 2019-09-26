@@ -35,6 +35,7 @@
 namespace Skyline\HTML\Form\Control;
 
 use Skyline\HTML\ElementInterface;
+use Skyline\HTML\Form\Style\StyleMapInterface;
 use Skyline\HTML\TextContentElement;
 
 abstract class AbstractLabelControl extends AbstractControl
@@ -87,6 +88,10 @@ abstract class AbstractLabelControl extends AbstractControl
             $label = new TextContentElement("label", $label);
             $label->setSkipInlineFormat(true);
             $label["for"] = $this->controlElement["id"];
+
+            if($map = $this->getForm()->getStyleClassMap())
+                $label["class"] = $map->getStyleClass( StyleMapInterface::CONTROL_LABEL_STYLE );
+
             return $label;
         }
         return NULL;
@@ -113,6 +118,9 @@ abstract class AbstractLabelControl extends AbstractControl
             $element->setSkipInlineFormat(true);
             $element["id"] = $this->controlElement["id"] . "-help";
             $element["aria-labelledby"] = $this->controlElement["id"];
+            if($map = $this->getForm()->getStyleClassMap())
+                $label["class"] = $map->getStyleClass( StyleMapInterface::CONTROL_DESCRIPTION_STYLE );
+
             return $element;
         }
         return NULL;

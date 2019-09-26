@@ -40,6 +40,7 @@ use Skyline\HTML\Element;
 use Skyline\HTML\ElementInterface;
 use Skyline\HTML\Form\Exception\FormValidationException;
 use Skyline\HTML\Form\FormElement;
+use Skyline\HTML\Form\Style\StyleMapInterface;
 use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
 use Skyline\HTML\Form\Validator\ValidatorInterface;
 use Skyline\HTML\TextContentElement;
@@ -60,6 +61,7 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
 
     /** @var bool  */
     private $enabled = true;
+    private $required = false;
 
 
     // During building, this properties are available
@@ -88,6 +90,22 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         parent::__construct();
         $this->name = $name;
         $this["id"] = is_string($identifier) ? $identifier : uniqid("ctrl_");
+    }
+
+    /**
+     * @return bool
+     */
+    public function isRequired(): bool
+    {
+        return $this->required;
+    }
+
+    /**
+     * @param bool $required
+     */
+    public function setRequired(bool $required): void
+    {
+        $this->required = $required;
     }
 
     /**
@@ -297,6 +315,8 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         $this->containerElement = $element = $this->buildInitialElement();
         if($noEl = $element ? false : true) {
             $element = new Element("d", true);
+        } elseif($map = $this->getForm()->getStyleClassMap()) {
+            $element["class"] = $map->getStyleClass( StyleMapInterface::CONTAINER_STYLE );
         }
 
         $this->controlElement = $control = $this->buildControl();
@@ -342,7 +362,7 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         if($this->containerElement) {
             if($this->getForm()->isAlwaysDisplayValidationFeedbacks() || ($this->isValidated() && $this->isValid())) {
                 $element = new TextContentElement("div", $this->getValidFeedback() ?? "");
-                $element['class'] = 'valid-feedback';
+                $element['class'] = ($map = $this->getForm()->getStyleClassMap()) ? $map->getStyleClass( StyleMapInterface::FEEDBACK_VALID_STYLE ) : 'valid-feedback';
                 return $element;
             }
         }
@@ -358,7 +378,7 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         if($this->containerElement) {
             if($this->getForm()->isAlwaysDisplayValidationFeedbacks() || ($this->isValidated() && !$this->isValid())) {
                 $element = new TextContentElement("div", $this->getInvalidFeedback() ?? "");
-                $element['class'] = 'invalid-feedback';
+                $element['class'] = ($map = $this->getForm()->getStyleClassMap()) ? $map->getStyleClass( StyleMapInterface::FEEDBACK_INVALID_STYLE ) : 'invalid-feedback';
                 return $element;
             }
         }
@@ -377,6 +397,14 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         $control["id"] = $this->getID();
 
         $control["name"] = $this->getName();
+
+        if($map = $this->getForm()->getStyleClassMap()) {
+            if($this->isRequired())
+                $control["class"] = $map->getStyleClasses( [ StyleMapInterface::CONTROL_STYLE, StyleMapInterface::CONTROL_REQUIRED_STYLE ] );
+            else
+                $control["class"] = $map->getStyleClass( StyleMapInterface::CONTROL_STYLE );
+        }
+
 
         foreach($this->getAttributes() as $key => $value)
             $control[$key] = $value;

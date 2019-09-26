@@ -36,6 +36,7 @@ namespace Skyline\HTML\Form;
 
 use Skyline\HTML\Element;
 use Skyline\HTML\ElementInterface;
+use Skyline\HTML\Form\Control\AbstractControl;
 use Skyline\HTML\Form\Control\ControlInterface;
 use Skyline\HTML\Form\Control\Verification\VerificationControlInterface;
 use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
@@ -238,8 +239,15 @@ class FormElement extends Element implements ElementInterface
             }
         }
 
-        if(!$list && $this->getVerificationControl()) {
-            $this->verified = $this->getVerificationControl()->verifyWithOptions( $this->verificationControlOptions ?? [] );
+        if(!$list && ($vc = $this->getVerificationControl())) {
+            $this->verified = $vc->verifyWithOptions( $this->verificationControlOptions ?? [] );
+            if(!$this->verified) {
+                if($vc instanceof AbstractControl)
+                    /** @var \stdClass $vc */
+                    (function() use ($vc) {$vc->valid = false;})->bindTo($vc, AbstractControl::class)();
+
+                $invalidate($vc);
+            }
         }
 
         return $list;

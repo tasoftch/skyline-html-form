@@ -40,6 +40,7 @@ use Skyline\HTML\Element;
 use Skyline\HTML\ElementInterface;
 use Skyline\HTML\Form\Exception\FormValidationException;
 use Skyline\HTML\Form\FormElement;
+use Skyline\HTML\Form\Style\AdvancedStyleMapInterface;
 use Skyline\HTML\Form\Style\StyleMapInterface;
 use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
 use Skyline\HTML\Form\Validator\ValidatorInterface;
@@ -82,8 +83,8 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
     private $valid = false;
     private $validated = false;
 
-    private $validFeedback = "Valid";
-    private $invalidFeedback = 'Invalid';
+    private $validFeedback = "";
+    private $invalidFeedback = '';
 
     public function __construct(string $name, string $identifier = NULL)
     {
@@ -316,7 +317,10 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         if($noEl = $element ? false : true) {
             $element = new Element("d", true);
         } elseif($map = $this->getForm()->getStyleClassMap()) {
-            $element["class"] = $map->getStyleClass( StyleMapInterface::CONTAINER_STYLE );
+            if($map instanceof AdvancedStyleMapInterface)
+                $element = $map->styleUpElement($element, AdvancedStyleMapInterface::CONTAINER_ELEMENT, $this);
+            else
+                $element["class"] = $map->getStyleClass( StyleMapInterface::CONTAINER_STYLE );
         }
 
         $this->controlElement = $control = $this->buildControl();
@@ -362,7 +366,12 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         if($this->containerElement) {
             if($this->getForm()->isAlwaysDisplayValidationFeedbacks() || ($this->isValidated() && $this->isValid())) {
                 $element = new TextContentElement("div", $this->getValidFeedback() ?? "");
-                $element['class'] = ($map = $this->getForm()->getStyleClassMap()) ? $map->getStyleClass( StyleMapInterface::FEEDBACK_VALID_STYLE ) : 'valid-feedback';
+                if($map = $this->getForm()->getStyleClassMap()) {
+                    if($map instanceof AdvancedStyleMapInterface)
+                        $element = $map->styleUpElement($element, AdvancedStyleMapInterface::FEEDBACK_ELEMENT, $this);
+                    else
+                        $element['class'] = $map->getStyleClass( StyleMapInterface::FEEDBACK_VALID_STYLE );
+                }
                 return $element;
             }
         }
@@ -378,7 +387,12 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         if($this->containerElement) {
             if($this->getForm()->isAlwaysDisplayValidationFeedbacks() || ($this->isValidated() && !$this->isValid())) {
                 $element = new TextContentElement("div", $this->getInvalidFeedback() ?? "");
-                $element['class'] = ($map = $this->getForm()->getStyleClassMap()) ? $map->getStyleClass( StyleMapInterface::FEEDBACK_INVALID_STYLE ) : 'invalid-feedback';
+                if($map = $this->getForm()->getStyleClassMap()) {
+                    if($map instanceof AdvancedStyleMapInterface)
+                        $element = $map->styleUpElement($element, AdvancedStyleMapInterface::FEEDBACK_ELEMENT, $this);
+                    else
+                        $element['class'] = $map->getStyleClass( StyleMapInterface::FEEDBACK_INVALID_STYLE );
+                }
                 return $element;
             }
         }
@@ -399,16 +413,20 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         $control["name"] = $this->getName();
 
         if($map = $this->getForm()->getStyleClassMap()) {
-            $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_STYLE );
-            if($this->isRequired())
-                $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_REQUIRED_STYLE );
-            if($this->isValidated()) {
-                if($this->isValid())
-                    $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_VALID_STYLE );
-                else
-                    $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_INVALID_STYLE );
+            if($map instanceof AdvancedStyleMapInterface) {
+                $control = $map->styleUpElement($control, AdvancedStyleMapInterface::CONTROL_ELEMENT, $this);
+            } else {
+                $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_STYLE );
+                if($this->isRequired())
+                    $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_REQUIRED_STYLE );
+                if($this->isValidated()) {
+                    if($this->isValid())
+                        $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_VALID_STYLE );
+                    else
+                        $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_INVALID_STYLE );
+                }
+                $control["class"] = implode(" ", $classes);
             }
-            $control["class"] = implode(" ", $classes);
         }
 
 

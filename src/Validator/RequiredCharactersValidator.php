@@ -35,13 +35,40 @@
 namespace Skyline\HTML\Form\Validator;
 
 
-interface ValidatorInterface
+use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
+
+class RequiredCharactersValidator extends AbstractComparisonValidator
 {
+    private $caseInsensitive = false;
+
+    public function __construct(string $characters, bool $caseInsensitive = false, ConditionInterface $condition = NULL)
+    {
+        parent::__construct($characters, $condition);
+        $this->caseInsensitive = $caseInsensitive;
+    }
+
+    public function getCharacters(): string { return $this->getComparisonValue(); }
+
+    public function validateValue($value)
+    {
+        $func = $this->isCaseInsensitive() ? 'stripos' : 'strpos';
+        $chars = $this->getCharacters();
+
+        for($e=0;$e < strlen($chars);$e++) {
+            $char = $chars[$e];
+
+            if($func($value, $char) === false) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * @return bool
      */
-    public function validateValue($value);
+    public function isCaseInsensitive(): bool
+    {
+        return $this->caseInsensitive;
+    }
 }

@@ -34,14 +34,17 @@
 
 namespace Skyline\HTML\Form\Validator;
 
-
-interface ValidatorInterface
+/**
+ * The xor combine validator uses two further validators and marks a control valid, if one validator is true, but not both or none.
+ * @package Skyline\HTML\Form
+ */
+class CombineXORValidator extends CombineORValidator
 {
-    /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
-     */
-    public function validateValue($value);
+    public function validateValue($value)
+    {
+        $l = $this->getLeftValidator()->validateValue($value);
+        $r = $this->getRightValidator()->validateValue($value);
+
+        return $l || $r && $l != $r;
+    }
 }

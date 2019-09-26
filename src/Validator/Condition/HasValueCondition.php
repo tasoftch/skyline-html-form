@@ -32,16 +32,31 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Validator\Condition;
 
 
-interface ValidatorInterface
+use Skyline\HTML\Form\Control\ControlInterface;
+
+class HasValueCondition extends AbstractCondition
 {
+    private $value;
+
+    public function __construct(ControlInterface $control, $value)
+    {
+        parent::__construct($control);
+        $this->value = $value;
+    }
+
+    public function isConditionTrue($value): bool
+    {
+        return $this->getControl()->getValue() == $this->getValue() ? true : false;
+    }
+
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * @return mixed
      */
-    public function validateValue($value);
+    public function getValue()
+    {
+        return $this->value;
+    }
 }

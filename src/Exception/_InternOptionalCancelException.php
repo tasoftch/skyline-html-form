@@ -32,16 +32,17 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Exception;
 
 
-interface ValidatorInterface
+use RuntimeException;
+
+/**
+ * Class _InternOptionalCancelException
+ * @package Skyline\HTML\Form\Exception
+ * @internal
+ */
+class _InternOptionalCancelException extends RuntimeException
 {
-    /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
-     */
-    public function validateValue($value);
+    public $success = true;
 }

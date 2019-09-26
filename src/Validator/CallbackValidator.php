@@ -35,13 +35,41 @@
 namespace Skyline\HTML\Form\Validator;
 
 
-interface ValidatorInterface
+use Skyline\HTML\Form\Exception\FormValidationException;
+use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
+
+class CallbackValidator extends AbstractConditionalValidator
 {
+    /** @var callable */
+    private $callback;
+
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * CallbackValidator constructor.
+     * @param callable $callback
      */
-    public function validateValue($value);
+    public function __construct(callable $callback, ConditionInterface $condition = NULL)
+    {
+        parent::__construct($condition);
+        $this->callback = $callback;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getCallback(): callable
+    {
+        return $this->callback;
+    }
+
+    public function validateValue($value)
+    {
+        $errorFormat = "Value is not valid";
+        $code = 0;
+
+        if(!($this->callback)($value, $code, $errorFormat)) {
+            $e = new FormValidationException($errorFormat, $code);
+            $e->setValidator($this);
+            throw $e;
+        }
+    }
 }

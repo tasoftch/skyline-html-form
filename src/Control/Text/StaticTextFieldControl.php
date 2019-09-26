@@ -32,16 +32,13 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Control\Text;
 
 
-interface ValidatorInterface
+class StaticTextFieldControl extends TextFieldControl
 {
-    /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
-     */
-    public function validateValue($value);
+    public function isReadonly(): bool
+    {
+        return true;
+    }
 }

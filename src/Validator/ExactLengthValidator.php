@@ -35,13 +35,48 @@
 namespace Skyline\HTML\Form\Validator;
 
 
-interface ValidatorInterface
+use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
+
+/**
+ * Exact length of a string required
+ * @package Skyline\HTML\Form
+ */
+class ExactLengthValidator extends AbstractComparisonValidator
 {
+    public function __construct(int $length, ConditionInterface $condition = NULL)
+    {
+        parent::__construct($length, $condition);
+    }
+
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * Get the required length
+     * @return int
      */
-    public function validateValue($value);
+    public function getLength(): int { return $this->getComparisonValue(); }
+
+    /**
+     * @inheritDoc
+     */
+    public function validateValue($value)
+    {
+        $state = $this->getValueState($value);
+        return $this->compareState($state);
+    }
+
+    /**
+     * @param $value
+     * @return int
+     */
+    protected function getValueState($value) {
+        if (function_exists("mb_strlen"))
+            return mb_strlen($value);
+        return strlen($value);
+    }
+
+    protected function compareState($state) {
+        if ($state != $this->getLength()) {
+            return false;
+        }
+        return true;
+    }
 }

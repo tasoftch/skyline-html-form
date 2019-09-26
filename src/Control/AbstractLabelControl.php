@@ -34,58 +34,80 @@
 
 namespace Skyline\HTML\Form\Control;
 
-use Skyline\HTML\Form\FormElement;
+use Skyline\HTML\ElementInterface;
+use Skyline\HTML\TextContentElement;
 
-interface ControlInterface
+abstract class AbstractLabelControl extends AbstractControl
 {
+    /** @var string */
+    private $label;
+
+    /** @var mixed  */
+    private $description = "";
+
     /**
-     * Form elements are normally identified by it's names
-     *
      * @return string
      */
-    public function getName();
+    public function getLabel()
+    {
+        return $this->label;
+    }
 
     /**
-     * For precise identification and html element compatibility, ids are used as well
-     *
-     * @return string
+     * @param string $label
      */
-    public function getID();
+    public function setLabel(string $label): void
+    {
+        $this->label = $label;
+    }
 
     /**
-     * Set the controls value
-     *
-     * @param $value
-     * @return void
-     */
-    public function setValue($value);
-
-    /**
-     * Get the control's value
-     *
      * @return mixed
      */
-    public function getValue();
+    public function getDescription()
+    {
+        return $this->description;
+    }
 
     /**
-     * Validates the value of the control.
+     * @param mixed $description
+     */
+    public function setDescription($description): void
+    {
+        $this->description = $description;
+    }
+
+    /**
+     * Builds the label element
      *
-     * @return false if validation fails
+     * @return ElementInterface|null
      */
-    public function validate();
+    protected function buildLabelElement(): ?ElementInterface {
+        if($this->containerElement && $label = $this->getLabel()) {
+            $label = new TextContentElement("label", $label);
+            $label->setSkipInlineFormat(true);
+            $label["for"] = $this->controlElement["id"];
+            return $label;
+        }
+        return NULL;
+    }
+
+
 
     /**
-     * Gets the form
-     * @return FormElement|null
-     */
-    public function getForm(): ?FormElement;
-
-    /**
-     * Sets the form
-     * Is done by build-in implementation of FormElement on appending as child.
+     * Builds the description element
      *
-     * @param FormElement $formElement
-     * @return void
+     * @param $info
+     * @return ElementInterface|null
      */
-    public function setForm(FormElement $formElement);
+    protected function buildDescriptionElement(): ?ElementInterface {
+        if($this->containerElement && $desc = $this->getDescription()) {
+            $element = new TextContentElement("small", $desc);
+            $element->setSkipInlineFormat(true);
+            $element["id"] = $this->controlElement["id"] . "-help";
+            $element["aria-labelledby"] = $this->controlElement["id"];
+            return $element;
+        }
+        return NULL;
+    }
 }

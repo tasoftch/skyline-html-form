@@ -32,16 +32,25 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Control\Option;
 
 
-interface ValidatorInterface
+interface OptionValuesInterface
 {
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * Define an option value
+     * @param string $id
+     * @param $optionValue
+     * @param null $optionGroup
+     * @return void
      */
-    public function validateValue($value);
+    public function setOption(string $id, $optionValue, $optionGroup = NULL);
+
+    /**
+     * Obtain an option value using the id.
+     * @param string $id
+     * @param null $optionGroup
+     * @return mixed    Should return the option's value
+     */
+    public function getOption(string $id, &$optionGroup = NULL);
 }

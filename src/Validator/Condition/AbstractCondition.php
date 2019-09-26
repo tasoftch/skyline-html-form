@@ -32,16 +32,30 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Validator\Condition;
 
 
-interface ValidatorInterface
+use Skyline\HTML\Form\Control\ControlInterface;
+
+abstract class AbstractCondition implements ConditionInterface
 {
+    /** @var ControlInterface */
+    private $control;
+
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * AbstractControlBasedCondition constructor.
+     * @param ControlInterface $control
      */
-    public function validateValue($value);
+    public function __construct(ControlInterface $control)
+    {
+        $this->control = $control;
+    }
+
+    /**
+     * @return ControlInterface
+     */
+    public function getControl(): ControlInterface
+    {
+        return $this->control;
+    }
 }

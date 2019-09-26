@@ -35,10 +35,17 @@
 namespace Skyline\HTML\Form\Control;
 
 
+use Skyline\HTML\AbstractInlineBuildElement;
+use Skyline\HTML\Element;
+use Skyline\HTML\ElementInterface;
+use Skyline\HTML\Form\Exception\FormValidationException;
 use Skyline\HTML\Form\FormElement;
+use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
 use Skyline\HTML\Form\Validator\ValidatorInterface;
+use Skyline\HTML\TextContentElement;
+use Skyline\Render\Context\RenderContextInterface;
 
-class AbstractControl implements ControlInterface
+abstract class AbstractControl extends AbstractInlineBuildElement implements ControlInterface
 {
     private $value;
     /** @var FormElement|null */
@@ -51,9 +58,36 @@ class AbstractControl implements ControlInterface
     private $defaultValueUsed = true;
     private $validators = [];
 
-    public function __construct(string $name)
+    /** @var bool  */
+    private $enabled = true;
+
+
+    // During building, this properties are available
+    /** @var RenderContextInterface */
+    protected $renderContext;
+
+    /** @var mixed|null */
+    protected $renderInformation;
+
+    /** @var ElementInterface|null */
+    protected $containerElement;
+
+    /** @var ElementInterface */
+    protected $controlElement;
+
+    protected $levelIndent = 0;
+
+    private $valid = false;
+    private $validated = false;
+
+    private $validFeedback = "Valid";
+    private $invalidFeedback = 'Invalid';
+
+    public function __construct(string $name, string $identifier = NULL)
     {
+        parent::__construct();
         $this->name = $name;
+        $this["id"] = is_string($identifier) ? $identifier : uniqid("ctrl_");
     }
 
     /**
@@ -116,14 +150,6 @@ class AbstractControl implements ControlInterface
     }
 
     /**
-     * @param bool $defaultValueUsed
-     */
-    public function setDefaultValueUsed(bool $defaultValueUsed): void
-    {
-        $this->defaultValueUsed = $defaultValueUsed;
-    }
-
-    /**
      * @return ValidatorInterface[]
      */
     public function getValidators(): array
@@ -131,32 +157,246 @@ class AbstractControl implements ControlInterface
         return $this->validators;
     }
 
+    /**
+     * Adds a validator to the control
+     *
+     * @param ValidatorInterface $validator
+     */
     public function addValidator(ValidatorInterface $validator) {
         if(!in_array($validator, $this->validators))
             $this->validators[] = $validator;
     }
 
+    /**
+     * Removes a validator from control
+     *
+     * @param ValidatorInterface $validator
+     */
     public function removeValidator(ValidatorInterface $validator) {
         if(($idx = array_search($validator, $this->validators)) !== false) {
             unset($this->validators[$idx]);
         }
     }
 
+    /**
+     * @inheritDoc
+     */
     public function validate()
     {
         $value = $this->getValue();
+        $this->validated = true;
+        $this->valid = true;
+
         foreach($this->getValidators() as $validator) {
+            if(method_exists($validator, 'getCondition') && ($condition = $validator->getCondition())) {
+                if($condition instanceof  ConditionInterface && !$condition->isConditionTrue($value)) {
+                    trigger_error("Skip Validator of control " . $this->getName() . " because condition is not true", E_USER_NOTICE);
+                    continue;
+                }
+            }
             try {
-                if($feedback = $validator->validateValue($value))
-                    return $feedback;
-            } catch (FormValidationException $e) {
-                $e->setValidator($validator);
-                throw $e;
-            } catch (_InternOptionalCancelException $exception) {
-                // Optional validator passed. Cancel further validators
-                break;
+                if($validator->validateValue($value) === false) {
+                    $this->valid = false;
+                    return false;
+                }
+            } catch (FormValidationException $exception) {
+                $this->valid = false;
+                throw $exception;
+            }
+
+        }
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isValid(): bool
+    {
+        return $this->valid;
+    }
+
+    /**
+     * @return string
+     */
+    public function getInvalidFeedback(): string
+    {
+        return $this->invalidFeedback;
+    }
+
+    /**
+     * @param string $invalidFeedback
+     */
+    public function setInvalidFeedback(string $invalidFeedback): void
+    {
+        $this->invalidFeedback = $invalidFeedback;
+    }
+
+    /**
+     * @return string
+     */
+    public function getValidFeedback(): string
+    {
+        return $this->validFeedback;
+    }
+
+    /**
+     * @param string $validFeedback
+     */
+    public function setValidFeedback(string $validFeedback): void
+    {
+        $this->validFeedback = $validFeedback;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isValidated(): bool
+    {
+        return $this->validated;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isEnabled(): bool
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * @param bool $enabled
+     */
+    public function setEnabled(bool $enabled): void
+    {
+        $this->enabled = $enabled;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isDefaultValueUsed(): bool
+    {
+        return $this->defaultValueUsed;
+    }
+
+    public function toString($indent = 0): string
+    {
+        $this->levelIndent = $indent;
+        return parent::toString();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function buildElement(?RenderContextInterface $context, $info)
+    {
+        $this->renderContext = $context;
+        $this->renderInformation = $info;
+
+        $this->containerElement = $element = $this->buildInitialElement();
+        if($noEl = $element ? false : true) {
+            $element = new Element("d", true);
+        }
+
+        $this->controlElement = $control = $this->buildControl();
+        $this->buildFinalContainer($element, $control, $context, $info);
+
+        $this->renderContext = NULL;
+        $this->renderInformation = NULL;
+
+        if($noEl) {
+            $str = "";
+            foreach($element->getChildElements() as $child)
+                $str .= $child->toString($this->levelIndent);
+            return $str;
+        } else {
+            return $element->toString($this->levelIndent);
+        }
+    }
+
+    /**
+     * Use this method to create a container html element to represent this control.
+     *
+     * @return ElementInterface|null
+     */
+    protected function buildInitialElement(): ?ElementInterface {
+        return NULL;
+    }
+
+    /**
+     * Creates only the html element instance to represent the control
+     *
+     * @return ElementInterface
+     */
+    protected function buildControlElementInstance(): ElementInterface {
+        return new Element("input", false);
+    }
+
+    /**
+     * Creates a valid feedback html element
+     *
+     * @return ElementInterface|null
+     */
+    protected function buildValidFeedback(): ?ElementInterface {
+        if($this->containerElement) {
+            if($this->getForm()->isAlwaysDisplayValidationFeedbacks() || ($this->isValidated() && $this->isValid())) {
+                $element = new TextContentElement("div", $this->getValidFeedback() ?? "");
+                $element['class'] = 'valid-feedback';
+                return $element;
             }
         }
         return NULL;
     }
+
+    /**
+     * Creates an invalid feedback html element
+     *
+     * @return ElementInterface|null
+     */
+    protected function buildInvalidFeedback(): ?ElementInterface {
+        if($this->containerElement) {
+            if($this->getForm()->isAlwaysDisplayValidationFeedbacks() || ($this->isValidated() && !$this->isValid())) {
+                $element = new TextContentElement("div", $this->getInvalidFeedback() ?? "");
+                $element['class'] = 'invalid-feedback';
+                return $element;
+            }
+        }
+        return NULL;
+    }
+
+
+    /**
+     * Build the default control instance buildControlElementInstance for an instance and copies all attributes into it.
+     * The built in implementation asks
+     *
+     * @return ElementInterface
+     */
+    protected function buildControl(): ElementInterface {
+        $control = $this->buildControlElementInstance();
+        $control["id"] = $this->getID();
+
+        $control["name"] = $this->getName();
+
+        foreach($this->getAttributes() as $key => $value)
+            $control[$key] = $value;
+
+        if($v = $this->getValue())
+            $control["value"] = $v;
+
+        if(!$this->isEnabled())
+            $control["disabled"] = 'disabled';
+
+        return $control;
+    }
+
+    /**
+     * This method is called right before rendering the container element to adjust the container if needed
+     *
+     * @param ElementInterface $container
+     * @param ElementInterface $control
+     * @param RenderContextInterface $context
+     * @param $info
+     */
+    abstract protected function buildFinalContainer(ElementInterface $container, ElementInterface $control, ?RenderContextInterface $context, $info);
 }

@@ -32,16 +32,59 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+/**
+ * TextFieldTest.php
+ * skyline-html-form
+ *
+ * Created on 2019-09-24 17:17 by thomas
+ */
 
+use PHPUnit\Framework\TestCase;
+use Skyline\HTML\Form\Control\Option\PopUpControl;
+use Skyline\HTML\Form\Control\Text\TextAreaControl;
+use Skyline\HTML\Form\Control\Text\TextFieldControl;
+use Skyline\Render\Context\DefaultRenderContext;
 
-interface ValidatorInterface
+class TextFieldTest extends TestCase
 {
-    /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
-     */
-    public function validateValue($value);
+    public function tes_tLabelledTextField() {
+        $ctx = new DefaultRenderContext();
+        $tf = new TextFieldControl("test", 'he', TextFieldControl::TYPE_PASSWORD);
+
+        $tf->setDescription("My description");
+        $tf->setDefaultValue("23");
+        $tf->setPlaceholder("The placeholder");
+        $tf->setValue("zz");
+
+        $tf->setEnabled(false);
+
+        $tf->setLabel("My Text: ");
+
+
+        $this->assertFalse($tf->shouldBindToContext($ctx));
+        echo $tf->getRenderable()(NULL);
+    }
+
+    public function tes_tTextArea() {
+        $ctx = new DefaultRenderContext();
+        $tv = new TextAreaControl("test", 'he');
+
+        $tv->setValue("Hello < Here world");
+        $tv->setPlaceholder("Hehe");
+        $tv->setLabel("Test: ");
+        $tv->setDescription("Hehe");
+
+        $this->assertFalse($tv->shouldBindToContext($ctx));
+        echo $tv->getRenderable()(NULL);
+    }
+
+    public function tes_tOptionsList() {
+        $ctx = new DefaultRenderContext();
+        $tv = new PopUpControl("test", 'he');
+
+        $tv->setOption('tt', "Thomas T");
+
+        $this->assertFalse($tv->shouldBindToContext($ctx));
+        echo $tv->getRenderable()(NULL);
+    }
 }

@@ -35,13 +35,20 @@
 namespace Skyline\HTML\Form\Validator;
 
 
-interface ValidatorInterface
+class RequireOneCharacterValidator extends RequiredCharactersValidator
 {
-    /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
-     */
-    public function validateValue($value);
+    public function validateValue($value)
+    {
+        $func = $this->isCaseInsensitive() ? 'stripos' : 'strpos';
+        $chars = $this->getCharacters();
+
+        for($e=0;$e < strlen($chars);$e++) {
+            $char = $chars[$e];
+
+            if($func($value, $char) !== false) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

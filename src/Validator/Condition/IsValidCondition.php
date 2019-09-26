@@ -32,16 +32,21 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Validator\Condition;
 
 
-interface ValidatorInterface
+class IsValidCondition extends AbstractCondition
 {
-    /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
-     */
-    public function validateValue($value);
+    public function isConditionTrue($value): bool
+    {
+        $cnt = $this->getControl();
+
+        if(method_exists($cnt, 'isValidated')) {
+            if($cnt->isValidated() && method_exists($cnt, 'isValid')) {
+                return $cnt->isValid();
+            }
+        }
+        return false;
+    }
+
 }

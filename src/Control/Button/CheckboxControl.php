@@ -32,16 +32,70 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Control\Button;
 
 
-interface ValidatorInterface
+use Skyline\HTML\ElementInterface;
+use Skyline\HTML\Form\Control\AbstractLabelControl;
+use Skyline\HTML\Form\Control\DefaultContainerBuilderTrait;
+
+class CheckboxControl extends AbstractLabelControl
 {
+    use DefaultContainerBuilderTrait;
+
+    private $checkableValue;
+
+    private $checked = false;
+
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * @return mixed
      */
-    public function validateValue($value);
+    public function getCheckableValue()
+    {
+        return $this->checkableValue;
+    }
+
+    /**
+     * @param mixed $checkableValue
+     */
+    public function setCheckableValue($checkableValue): void
+    {
+        $this->checkableValue = $checkableValue;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isChecked(): bool
+    {
+        return $this->checked;
+    }
+
+    /**
+     * @param bool $checked
+     */
+    public function setChecked(bool $checked): void
+    {
+        $this->checked = $checked;
+    }
+
+    public function setValue($value): void
+    {
+        $this->setChecked($value ? true : false);
+    }
+
+    public function getValue()
+    {
+        return $this->isChecked();
+    }
+
+    protected function buildControl(): ElementInterface
+    {
+        $control = parent::buildControl();
+        $control["type"] = 'checkbox';
+        $control["value"] = $this->getCheckableValue();
+        if($this->isChecked())
+            $control["checked"] = 'checked';
+        return $control;
+    }
 }

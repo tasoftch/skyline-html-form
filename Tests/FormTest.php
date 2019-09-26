@@ -32,16 +32,41 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+/**
+ * FormTest.php
+ * skyline-html-form
+ *
+ * Created on 2019-09-25 19:36 by thomas
+ */
 
+use PHPUnit\Framework\TestCase;
+use Skyline\HTML\Form\Control\Text\TextFieldControl;
+use Skyline\HTML\Form\FormElement;
+use Skyline\HTML\Form\Validator\ExactLengthValidator;
 
-interface ValidatorInterface
+class FormTest extends TestCase
 {
-    /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
-     */
-    public function validateValue($value);
+    public function testForm() {
+        $form = new FormElement("", 'post', 'identifier');
+
+        $form->setHiddenValue("info", 78);
+
+        $tf = new TextFieldControl("name");
+        $form->appendElement($tf);
+
+        $tf->setValidFeedback("OK");
+        $tf->setInvalidFeedback("Not OK");
+
+        $tf->setLabel("Name:");
+        $tf->setDescription("Your name");
+
+        $tf->addValidator(new ExactLengthValidator(23));
+
+        $list = $form->validateForm($valid);
+        print_r($list);
+
+
+        $form->focusControl($tf);
+        echo $form->getRenderable()(NULL);
+    }
 }

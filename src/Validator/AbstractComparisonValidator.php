@@ -34,14 +34,24 @@
 
 namespace Skyline\HTML\Form\Validator;
 
+use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
 
-interface ValidatorInterface
+abstract class AbstractComparisonValidator extends AbstractConditionalValidator
 {
+    /** @var mixed */
+    private $comparisonValue;
+
+    public function __construct($comparisonValue, ConditionInterface $condition = NULL)
+    {
+        parent::__construct($condition);
+        $this->comparisonValue = $comparisonValue;
+    }
+
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * @return mixed
      */
-    public function validateValue($value);
+    public function getComparisonValue()
+    {
+        return $this->comparisonValue;
+    }
 }

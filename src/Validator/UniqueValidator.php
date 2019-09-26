@@ -35,13 +35,59 @@
 namespace Skyline\HTML\Form\Validator;
 
 
-interface ValidatorInterface
+use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
+
+class UniqueValidator extends AbstractComparisonValidator
 {
+    /** @var string[] */
+    private $values = [];
+    /** @var bool  */
+    private $caseInsensitive = false;
+
+    public function __construct(array $values = [], bool $caseInsensitive = false, ConditionInterface $condition = NULL)
+    {
+        parent::__construct($condition);
+        $this->values = $values;
+        $this->caseInsensitive = $caseInsensitive;
+    }
+
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * @return bool
      */
-    public function validateValue($value);
+    public function isCaseInsensitive(): bool
+    {
+        return $this->caseInsensitive;
+    }
+
+    public function addValue($value) {
+        if(!in_array($value, $this->values))
+            $this->values[] = $value;
+    }
+
+    public function removeValue($value) {
+        if(($idx = array_search($value, $this->values)) !== false)
+            unset($this->values[$idx]);
+    }
+
+    public function removeAllValues() {
+        $this->values = [];
+    }
+
+    /**
+     * @return array
+     */
+    public function getValues(): array
+    {
+        return $this->values;
+    }
+
+    public function validateValue($value)
+    {
+        $cmp = $this->isCaseInsensitive() ? 'strcasecmp' : 'strcmp';
+        foreach($this->getValues() as $v) {
+            if($cmp($v, $value) == 0)
+                return false;
+        }
+        return true;
+    }
 }

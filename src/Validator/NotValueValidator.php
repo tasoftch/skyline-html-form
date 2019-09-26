@@ -35,13 +35,19 @@
 namespace Skyline\HTML\Form\Validator;
 
 
-interface ValidatorInterface
+use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
+
+class NotValueValidator extends AbstractComparisonValidator
 {
-    /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
-     */
-    public function validateValue($value);
+    public function __construct($value, ConditionInterface $condition = NULL)
+    {
+        parent::__construct($value, $condition);
+    }
+
+    public function getValue() { return $this->getComparisonValue(); }
+
+    public function validateValue($value)
+    {
+        return $this->getValue() != $value ? true : false;
+    }
 }

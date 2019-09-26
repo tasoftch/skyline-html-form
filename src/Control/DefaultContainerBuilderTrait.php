@@ -32,16 +32,35 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Control;
 
 
-interface ValidatorInterface
+use Skyline\HTML\ElementInterface;
+use Skyline\Render\Context\RenderContextInterface;
+
+/**
+ * Trait DefaultContainerBuilderTrait
+ * @package Skyline\HTML\Form\Control
+ * @method buildLabelElement()
+ * @method buildValidFeedback()
+ * @method buildInvalidFeedback()
+ * @method buildDescriptionElement()
+ */
+trait DefaultContainerBuilderTrait
 {
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * @inheritDoc
      */
-    public function validateValue($value);
+    protected function buildFinalContainer(ElementInterface $container, ElementInterface $control, ?RenderContextInterface $context, $info)
+    {
+        if($c = $this->buildLabelElement())
+            $container->appendElement($c);
+        $container->appendElement($control);
+        if($c = $this->buildValidFeedback())
+            $container->appendElement($c);
+        if($c = $this->buildInvalidFeedback())
+            $container->appendElement($c);
+        if($c = $this->buildDescriptionElement())
+            $container->appendElement($c);
+    }
 }

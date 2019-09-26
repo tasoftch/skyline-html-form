@@ -34,14 +34,55 @@
 
 namespace Skyline\HTML\Form\Validator;
 
+use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
 
-interface ValidatorInterface
+/**
+ * The combine OR validator takes two further validators and marks the control as valid if at least one validator's result is valid.
+ *
+ * @package Skyline\HTML\Form
+ */
+class CombineORValidator extends AbstractConditionalValidator
 {
+    /** @var ValidatorInterface */
+    private $leftValidator;
+
+    /** @var ValidatorInterface */
+    private $rightValidator;
+
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * CombineORValidator constructor.
+     * @param ValidatorInterface $leftValidator
+     * @param ValidatorInterface $rightValidator
+     * @param ConditionInterface $condition
      */
-    public function validateValue($value);
+    public function __construct(ValidatorInterface $leftValidator, ValidatorInterface $rightValidator, ConditionInterface $condition = NULL)
+    {
+        parent::__construct($condition);
+        $this->leftValidator = $leftValidator;
+        $this->rightValidator = $rightValidator;
+    }
+
+    /**
+     * @return ValidatorInterface
+     */
+    public function getLeftValidator(): ValidatorInterface
+    {
+        return $this->leftValidator;
+    }
+
+    /**
+     * @return ValidatorInterface
+     */
+    public function getRightValidator(): ValidatorInterface
+    {
+        return $this->rightValidator;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function validateValue($value)
+    {
+        return $this->getLeftValidator()->validateValue($value) || $this->getRightValidator()->validateValue($value);
+    }
 }

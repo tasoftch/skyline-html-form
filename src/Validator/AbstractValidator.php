@@ -35,13 +35,18 @@
 namespace Skyline\HTML\Form\Validator;
 
 
-interface ValidatorInterface
+use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
+
+abstract class AbstractValidator implements ValidatorInterface
 {
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
+     * Internal method to stop the current form validation.
      *
-     * @param $value
-     * @return bool|null
+     * @param bool $success
      */
-    public function validateValue($value);
+    protected function stopValidation(bool $success) {
+        $e = new _InternOptionalCancelException();
+        $e->success = $success;
+        throw $e;
+    }
 }

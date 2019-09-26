@@ -32,16 +32,76 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Control\Button;
 
 
-interface ValidatorInterface
+use Skyline\HTML\ElementInterface;
+use Skyline\HTML\Form\Control\AbstractControl;
+use Skyline\HTML\HTMLContentElement;
+use Skyline\Render\Context\RenderContextInterface;
+
+class ButtonControl extends AbstractControl
 {
+    const TYPE_SUBMIT = 'submit';
+    const TYPE_RESET = 'reset';
+    const TYPE_CUSTOM = 'button';
+
+    /** @var string */
+    private $type;
+
+    public function __construct(string $name, string $type = self::TYPE_CUSTOM, string $identifier = NULL)
+    {
+        parent::__construct($name, $identifier);
+        $this->type = $type;
+    }
+
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * @var mixed
      */
-    public function validateValue($value);
+    private $content;
+
+    /**
+     * @return string
+     */
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getContent()
+    {
+        return $this->content;
+    }
+
+    /**
+     * @param mixed $content
+     */
+    public function setContent($content): void
+    {
+        $this->content = $content;
+    }
+
+    protected function buildControlElementInstance(): ElementInterface
+    {
+        return new HTMLContentElement("button");
+    }
+
+    protected function buildControl(): ElementInterface
+    {
+        /** @var HTMLContentElement $control */
+        $control = parent::buildControl();
+        $control["type"] = $this->getType();
+        $control->setContent( $this->getContent() );
+        return $control;
+    }
+
+    protected function buildFinalContainer(ElementInterface $container, ElementInterface $control, ?RenderContextInterface $context, $info)
+    {
+        $container->appendElement($control);
+    }
+
+
 }

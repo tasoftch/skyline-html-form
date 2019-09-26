@@ -32,16 +32,14 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Validator\Condition;
 
 
-interface ValidatorInterface
+class HasNotValueCondition extends HasValueCondition
 {
-    /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
-     */
-    public function validateValue($value);
+    public function isConditionTrue($value): bool
+    {
+        return parent::isConditionTrue($value) ? false : true;
+    }
+
 }

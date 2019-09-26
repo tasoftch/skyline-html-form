@@ -34,14 +34,14 @@
 
 namespace Skyline\HTML\Form;
 
-
-use Skyline\HTML\AbstractElement;
+use Skyline\HTML\Element;
 use Skyline\HTML\ElementInterface;
 use Skyline\HTML\Form\Control\ControlInterface;
+use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
 use Skyline\HTML\Form\Exception\FormValidationException;
 use Symfony\Component\HttpFoundation\Request;
 
-class FormElement extends AbstractElement implements ElementInterface
+class FormElement extends Element implements ElementInterface
 {
     /** @var string */
     private $actionName;
@@ -57,21 +57,47 @@ class FormElement extends AbstractElement implements ElementInterface
     /** @var ControlInterface|null */
     private $actionControl;
 
+    /** @var ControlInterface|null */
+    private $controlFocus;
+
+    private $hiddenValues = [];
+
+    private $valid = false;
+    private $validated = false;
+    private $alwaysDisplayValidationFeedbacks = false;
+
 
     public function __construct(string $actionName, string $method = 'POST', $identifier = NULL, bool $multipart = false)
     {
 
         parent::__construct("form", true);
-        $this->actionName = $actionName;
-        $this->method = $method;
-        $this->multipart = $multipart;
+        $this["action"] = $this->actionName = $actionName;
+        $this["method"] = $this->method = $method;
+        if(($this->multipart = $multipart))
+            $this["enctype"] = 'multipart/form-data';
     }
 
-    public function appendChild(ElementInterface $childElement)
+    public function appendElement(ElementInterface $childElement)
     {
-        parent::appendChild($childElement);
+        parent::appendElement($childElement);
         if($childElement instanceof ControlInterface)
             $childElement->setForm($this);
+    }
+
+    /**
+     * Searches for a control with given name
+     *
+     * @param string $anID
+     * @return ControlInterface|null
+     */
+    public function getControlByName(string $aName): ?ControlInterface {
+        foreach($this->getChildElements() as $control) {
+            if($control instanceof ControlInterface) {
+                if($control->getName() == $aName)
+                    return $control;
+            }
+        }
+        return NULL;
     }
 
     /**
@@ -147,10 +173,10 @@ class FormElement extends AbstractElement implements ElementInterface
     }
 
     /**
-     * Validates the form
+     * Validates the form and retuns all invalid controls
      *
      * @param bool $valid
-     * @return ValidationFeedback[]
+     * @return ControlInterface[]
      */
     public function validateForm(bool &$valid = NULL): array
     {
@@ -158,52 +184,149 @@ class FormElement extends AbstractElement implements ElementInterface
         $valid = $this->valid = true;
         $this->validated = true;
 
-        if($csrf = $this->getCsrfToken()) {
-            if(!hash_equals($csrf->getValue(), $this->_sentCsrfToken)) {
-                $e = new AuthenticationException("CSRF token missmatch", 403);
-                throw $e;
-            }
-        }
+        $this["class"] = 'was-validated is-valid';
+
+        $invalidate = function(ControlInterface $element) use (&$list, &$valid ) {
+            $valid = $this->valid = false;
+            $list[ $element->getName() ] = $element;
+            $this->removeClass("is-valid");
+        };
 
         foreach($this->getChildElements() as $element) {
             if($element instanceof ControlInterface) {
-                /** @var ValidationFeedback $feed */
-                $feed = NULL;
-
                 try {
-                    $feed = $element->validate();
-                    if(!($feed instanceof ValidationFeedback)) {
-                        $cast = $feed ? true : false;
-                        if($feed === NULL)
-                            $cast = true;
-
-                        $feed = new ValidationFeedback($cast, $element, 0, is_string($feed) ? $feed : ($cast ? 'Validation succeeded' : "Validation failed"));
-                    }
+                    if(false === $element->validate())
+                        $invalidate($element);
                 } catch (FormValidationException $exception) {
-                    $feed = $exception->getFeedback();
-                    if(!$feed) {
-                        $msg = $exception->getMessage();
-
-                        if($info = $this->messages[ $element->getName()  ][get_class($exception->getValidator())] ?? false) {
-                            $msg = vsprintf($info, [$exception->getShortInfo()]);
-                        } elseif ($info = $this->messages[ $element->getName()  ]['all'] ?? false) {
-                            $msg = vsprintf($info, [$exception->getShortInfo()]);
-                        }
-                        $feed = new ValidationFeedback(false, $element, $exception->getCode(), $msg);
-                    }
-                }
-
-                if($feed) {
-                    if($feed->isSucceeded() == false)
-                        $valid = $this->valid = false;
-
-                    $list[ $feed->getControl()->getName() ] = $feed;
-                }
-                if(method_exists($element, 'setValidationFeedback')) {
-                    $element->setValidationFeedback($feed);
+                    $invalidate($element);
+                } catch (_InternOptionalCancelException $exception) {
+                    if(!$exception->success)
+                        $invalidate($element);
+                    break;
                 }
             }
         }
         return $list;
+    }
+
+    /**
+     * Sets the form data
+     *
+     * @param iterable $data
+     */
+    public function setData($data) {
+        if(is_iterable($data)) {
+            // $csrf = $this->csrfToken ? $this->csrfToken->getId() : "";
+
+            foreach($data as $key => $value) {
+                //if($csrf && $key == $csrf) {
+                //    $this->_sentCsrfToken = $value;
+                //    continue;
+                //}
+
+                if($element = $this->getControlByName($key)) {
+                    $element->setValue($value);
+                }
+                elseif($this[ $key ] ?? NULL) {
+                    $this[ $key ] = $value;
+                }
+            }
+        }
+    }
+
+    public function getData() {
+        $list = [];
+        foreach($this->getAttributes() as $name => $value) {
+            $list[$name] = $value;
+        }
+
+        foreach($this->getChildElements() as $name => $element) {
+            if($element instanceof ControlInterface)
+                $list[ $element->getName() ] = $element->getValue();
+        }
+        return $list;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isValidated(): bool
+    {
+        return $this->validated;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isValid(): bool
+    {
+        return $this->valid;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isAlwaysDisplayValidationFeedbacks(): bool
+    {
+        return $this->alwaysDisplayValidationFeedbacks;
+    }
+
+    /**
+     * Defines, if the valid and invalid feedbacks always are displayed or only if the validation was failed or succeeded
+     *
+     * @param bool $alwaysDisplayValidationFeedbacks
+     */
+    public function setAlwaysDisplayValidationFeedbacks(bool $alwaysDisplayValidationFeedbacks): void
+    {
+        $this->alwaysDisplayValidationFeedbacks = $alwaysDisplayValidationFeedbacks;
+    }
+
+    /**
+     * @return ControlInterface|null
+     */
+    public function getControlInFocus(): ?ControlInterface
+    {
+        return $this->controlFocus;
+    }
+
+    /**
+     * @param ControlInterface|null $controlFocus
+     */
+    public function focusControl(?ControlInterface $controlFocus): void
+    {
+        $this->controlFocus = $controlFocus;
+    }
+
+    public function setHiddenValue(string $name, $value) {
+        if($value === NULL)
+            unset($this->hiddenValues[$name]);
+        else
+            $this->hiddenValues[$name] = $value;
+    }
+
+    public function getHiddenValue(string $name) {
+        return $this->hiddenValues[$name] ?? NULL;
+    }
+
+    protected function stringifyStart(int $indention = 0): string
+    {
+        $ind = $this->formatOutput() ? ($this->getIndentionString($indention) . "\t") : '';
+        $nl = $this->formatOutput() ? PHP_EOL : '';
+
+        $html = parent::stringifyStart($indention);
+
+        foreach($this->hiddenValues as $attr => $value) {
+            $html .= sprintf("$ind<input type=\"hidden\" name=\"%s\" value=\"%s\">$nl", htmlspecialchars($attr), htmlspecialchars($value));
+        }
+        return $html;
+    }
+
+    protected function stringifyEnd(int $indention = 0): string
+    {
+        $html = parent::stringifyEnd($indention);
+        if($focus = $this->getControlInFocus()) {
+            $html .= "<script type='application/javascript'>document.getElementById('". $focus->getID() . "').focus();</script>";
+        }
+        return $html;
     }
 }

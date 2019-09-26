@@ -35,13 +35,46 @@
 namespace Skyline\HTML\Form\Validator;
 
 
-interface ValidatorInterface
+use ArrayAccess;
+use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
+
+class RequiredOptionsValidator extends AbstractConditionalValidator
 {
+    private $options = [];
+
+    public function __construct(array $options = [], ConditionInterface $condition = NULL)
+    {
+        parent::__construct($condition);
+        $this->options = $options;
+    }
+
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * @return array
      */
-    public function validateValue($value);
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
+    public function addOption($option) {
+        $this->options = array_unique( array_merge($this->options, [$option]) );
+    }
+
+    public function removeOption($option) {
+        if(($idx = array_search($option, $this->options)) !== false)
+            unset($this->options[$idx]);
+    }
+
+    public function validateValue($value)
+    {
+        if(is_array($value) || $value instanceof ArrayAccess) {
+            foreach($this->getOptions() as $option) {
+                if(!in_array($option, $value))
+                    return false;
+            }
+            return true;
+        }
+        trigger_error("Value is not an array", E_USER_WARNING);
+        return false;
+    }
 }

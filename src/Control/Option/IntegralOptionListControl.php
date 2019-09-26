@@ -32,16 +32,45 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Control\Option;
 
 
-interface ValidatorInterface
+use RuntimeException;
+use Skyline\HTML\ElementInterface;
+
+/**
+ * The integral option list holds options with numbers in binary system.
+ * Getting or setting the value is an integer number. The options are combined using the bitwise or operation.
+ *
+ * @package Skyline\HTML\Form
+ */
+class IntegralOptionListControl extends OptionListControl
 {
-    /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
-     */
-    public function validateValue($value);
+    protected function buildOptionInput($optionID, $optionValue): ElementInterface
+    {
+        $input = parent::buildOptionInput($optionID, $optionValue);
+        $input["type"] = 'checkbox';
+        $input["name"] = sprintf("%s[]", $this->getName());
+
+        if(!is_integer($optionID))
+            throw new RuntimeException("Can not create integral option item for #$optionID with label $optionValue");
+
+        if($this->getValue() & $optionID)
+            $input["checked"] = 'checked';
+
+        return $input;
+    }
+
+    public function setValue($value): void
+    {
+        if(is_iterable($value)) {
+            $integral = 0;
+            foreach ($value as $v) {
+                if(is_integer($v))
+                    $integral |= $v;
+            }
+            $value = $integral;
+        }
+        parent::setValue($value);
+    }
 }

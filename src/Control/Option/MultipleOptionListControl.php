@@ -32,67 +32,30 @@
  *
  */
 
-namespace Skyline\HTML\Form;
+namespace Skyline\HTML\Form\Control\Option;
 
 
-use Skyline\HTML\Form\Control\ControlInterface;
+use Skyline\HTML\ElementInterface;
 
-class ValidationFeedback
+/**
+ * Modifies the option list into checkbox input elements where the user can choose more than one option.
+ * Multiple option lists prefer arrays as values!
+ *
+ * @package Skyline\HTML\Form
+ */
+class MultipleOptionListControl extends OptionListControl
 {
-    /** @var bool */
-    private $succeeded;
-
-    /** @var ControlInterface */
-    private $control;
-    /** @var int */
-    private $code;
-
-    /** @var string|null */
-    private $description;
-
-    /**
-     * ValidationFeedback constructor.
-     * @param ControlInterface $control
-     * @param int $code
-     * @param null|string $description
-     */
-    public function __construct(bool $succeeded, ControlInterface $control, int $code = 0, string $description = "")
+    protected function buildOptionInput($optionID, $optionValue): ElementInterface
     {
-        $this->succeeded = $succeeded;
-        $this->control = $control;
-        $this->code = $code;
-        $this->description = $description;
-    }
+        $input = parent::buildOptionInput($optionID, $optionValue);
+        $input["type"] = 'checkbox';
+        $input["name"] = sprintf("%s[]", $this->getName());
 
-    /**
-     * @return ControlInterface
-     */
-    public function getControl(): ControlInterface
-    {
-        return $this->control;
-    }
+        $value = $this->getValue();
+        if((is_array($value) && in_array($optionID, $value)) || $value == $optionID) {
+            $input["checked"] = 'checked';
+        }
 
-    /**
-     * @return int
-     */
-    public function getCode(): int
-    {
-        return $this->code;
-    }
-
-    /**
-     * @return null|string
-     */
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isSucceeded(): bool
-    {
-        return $this->succeeded;
+        return $input;
     }
 }

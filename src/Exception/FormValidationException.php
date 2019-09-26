@@ -35,19 +35,14 @@
 namespace Skyline\HTML\Form\Exception;
 
 
-use Skyline\HTML\Form\ValidationFeedback;
+use RuntimeException;
 use Skyline\HTML\Form\Validator\ValidatorInterface;
 use Throwable;
 
-class FormValidationException extends \RuntimeException
+class FormValidationException extends RuntimeException
 {
     /** @var ValidatorInterface|null */
     private $validator;
-    /** @var ValidationFeedback */
-    private $feedback;
-
-
-    private $shortInfo;
 
     public function __construct(string $message = "", int $code = 0, Throwable $previous = NULL, ...$args)
     {
@@ -68,37 +63,5 @@ class FormValidationException extends \RuntimeException
     public function setValidator(ValidatorInterface $validator): void
     {
         $this->validator = $validator;
-    }
-
-    /**
-     * @return ValidationFeedback|null
-     */
-    public function getFeedback(): ?ValidationFeedback
-    {
-        return $this->feedback;
-    }
-
-    /**
-     * @param ValidationFeedback $feedback
-     */
-    public function setFeedback(ValidationFeedback $feedback): void
-    {
-        $this->feedback = $feedback;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getShortInfo()
-    {
-        return $this->shortInfo;
-    }
-
-    /**
-     * @param mixed $shortInfo
-     */
-    public function setShortInfo($shortInfo): void
-    {
-        $this->shortInfo = $shortInfo;
     }
 }

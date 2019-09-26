@@ -32,16 +32,20 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Validator\Condition;
 
 
-interface ValidatorInterface
+/**
+ * Use conditions to validate a control only if another control fulfills a condition.
+ * @package Skyline\HTML\Form
+ */
+interface ConditionInterface
 {
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
+     * Called by a validator of a control
      *
-     * @param $value
-     * @return bool|null
+     * @param mixed $value
+     * @return bool
      */
-    public function validateValue($value);
+    public function isConditionTrue($value): bool;
 }

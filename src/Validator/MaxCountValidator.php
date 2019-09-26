@@ -35,13 +35,13 @@
 namespace Skyline\HTML\Form\Validator;
 
 
-interface ValidatorInterface
+class MaxCountValidator extends ExactCountValidator
 {
-    /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
-     */
-    public function validateValue($value);
+    protected function compareState($state)
+    {
+        if($state > $this->getCount()) {
+            return false;
+        }
+        return true;
+    }
 }

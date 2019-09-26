@@ -32,16 +32,66 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Control\File;
 
 
-interface ValidatorInterface
+use Skyline\HTML\ElementInterface;
+use Skyline\HTML\Form\Control\Text\TextFieldControl;
+
+class FileInputControl extends TextFieldControl
 {
+    /** @var bool */
+    private $multiple = false;
+    /** @var array | null */
+    private $allowedTypes;
+
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * @inheritDoc
      */
-    public function validateValue($value);
+    public function __construct(string $name, string $id = NULL)
+    {
+        parent::__construct($name, $id, 'file');
+    }
+
+    /**
+     * @return bool
+     */
+    public function isMultiple(): bool
+    {
+        return $this->multiple;
+    }
+
+    /**
+     * @param bool $multiple
+     */
+    public function setMultiple(bool $multiple): void
+    {
+        $this->multiple = $multiple;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getAllowedTypes(): ?array
+    {
+        return $this->allowedTypes;
+    }
+
+    /**
+     * @param array|null $allowedTypes
+     */
+    public function setAllowedTypes(?array $allowedTypes): void
+    {
+        $this->allowedTypes = $allowedTypes;
+    }
+
+    protected function buildControl(): ElementInterface
+    {
+        $control = parent::buildControl();
+        if($this->isMultiple())
+            $control["multiple"] = 'multiple';
+        if($types = $this->getAllowedTypes())
+            $control["accept"] = implode(",", $types);
+        return $control;
+    }
 }

@@ -34,14 +34,35 @@
 
 namespace Skyline\HTML\Form\Validator;
 
+use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
 
-interface ValidatorInterface
+/**
+ * Exact count of items in a collection required.
+ * Note that controls using this validator must support array values!
+ *
+ * @package Skyline\HTML\Form
+ */
+class ExactCountValidator extends ExactLengthValidator
 {
+    public function __construct(int $count, ?ConditionInterface $condition)
+    {
+        parent::__construct($count, $condition);
+    }
+
     /**
-     * This method is called for each validator of a control. Only if this method returns false, the control gets marked as invalid.
-     *
-     * @param $value
-     * @return bool|null
+     * @return int
      */
-    public function validateValue($value);
+    public function getCount(): int
+    {
+        return $this->getComparisonValue();
+    }
+
+    protected function getValueState($value)
+    {
+        if(is_countable($value)) {
+            return count($value);
+        }
+        trigger_error("Value is not countable", E_USER_WARNING);
+        return $this->stopValidation(false);
+    }
 }

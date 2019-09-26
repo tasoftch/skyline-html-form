@@ -103,5 +103,8 @@ class ButtonControl extends AbstractControl
         $container->appendElement($control);
     }
 
-
+    protected function skipValidation(): bool
+    {
+        return true;
+    }
 }

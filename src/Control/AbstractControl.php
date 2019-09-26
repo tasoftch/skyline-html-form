@@ -202,6 +202,9 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
      */
     public function validate()
     {
+        if($this->skipValidation())
+            return true;
+
         $value = $this->getValue();
         $this->validated = true;
         $this->valid = true;
@@ -225,6 +228,15 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
 
         }
         return true;
+    }
+
+    /**
+     * Subclasses may decide if they are able to validate.
+     *
+     * @return bool
+     */
+    protected function skipValidation(): bool {
+        return false;
     }
 
     /**

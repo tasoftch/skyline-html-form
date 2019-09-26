@@ -399,10 +399,16 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         $control["name"] = $this->getName();
 
         if($map = $this->getForm()->getStyleClassMap()) {
+            $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_STYLE );
             if($this->isRequired())
-                $control["class"] = $map->getStyleClasses( [ StyleMapInterface::CONTROL_STYLE, StyleMapInterface::CONTROL_REQUIRED_STYLE ] );
-            else
-                $control["class"] = $map->getStyleClass( StyleMapInterface::CONTROL_STYLE );
+                $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_REQUIRED_STYLE );
+            if($this->isValidated()) {
+                if($this->isValid())
+                    $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_VALID_STYLE );
+                else
+                    $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_INVALID_STYLE );
+            }
+            $control["class"] = implode(" ", $classes);
         }
 
 

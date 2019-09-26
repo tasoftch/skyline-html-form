@@ -52,6 +52,8 @@ interface StyleMapInterface
 
     const CONTROL_LABEL_STYLE = 'control.label';
     const CONTROL_DESCRIPTION_STYLE = 'control.description';
+    const CONTROL_VALID_STYLE = 'control.valid';
+    const CONTROL_INVALID_STYLE = 'control.invalid';
 
     const FEEDBACK_VALID_STYLE = 'feedback.valid';
     const FEEDBACK_INVALID_STYLE = 'feedback.invalid';

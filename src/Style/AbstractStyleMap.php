@@ -32,14 +32,60 @@
  *
  */
 
-namespace Skyline\HTML\Form;
+namespace Skyline\HTML\Form\Style;
 
 
-class StyleClassMap
+abstract class AbstractStyleMap implements StyleMapInterface
 {
+    protected $styles;
 
+    /**
+     * @param string $style
+     * @return string|null
+     */
+    public function getStyleClass(string $style): ?string
+    {
+        return $this->getStyles()[$style] ?? NULL;
+    }
 
-    private $styles = [];
+    /**
+     * @param array $styles
+     * @return string|null
+     */
+    public function getStyleClasses(array $styles): ?string
+    {
+        foreach($styles as &$style) {
+            $style = $this->getStyleClass($style);
+        }
+        $styles = array_filter($styles, function($v) { return $v ? true : false; });
+        return implode(" ", $styles);
+    }
 
+    /**
+     * Checks if a style exists in the map
+     *
+     * @param $name
+     * @return bool
+     */
+    public function hasStyle($name) {
+        return isset($this->styles[$name]);
+    }
 
+    /**
+     * Get all styles
+     * @return array
+     */
+    public function getStyles(): array {
+        if(NULL === $this->styles)
+            $this->styles = $this->loadStyles();
+        return $this->styles;
+    }
+
+    /**
+     * Loads the build-in styles
+     * This method is only called once
+     *
+     * @return array
+     */
+    abstract protected function loadStyles(): array;
 }

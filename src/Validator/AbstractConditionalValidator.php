@@ -46,7 +46,7 @@ abstract class AbstractConditionalValidator extends AbstractValidator
      * AbstractControlBasedCondition constructor.
      * @param ConditionInterface|null $condition
      */
-    public function __construct(?ConditionInterface $condition)
+    public function __construct(ConditionInterface $condition = NULL)
     {
         $this->condition = $condition;
     }

@@ -49,7 +49,7 @@ class SimpleMathVerification extends TextFieldControl implements VerificationCon
     public function __construct(string $name, string $id = NULL, string $type = self::TYPE_NUMBER)
     {
         parent::__construct($name, $id, $type);
-        $this->addValidator(new MatchRegexValidator("^\d+$"));
+        $this->addValidator(new MatchRegexValidator("/^\d+$/"));
     }
 
     public function prepareVerificationOptions(): array

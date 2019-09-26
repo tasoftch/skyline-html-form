@@ -37,6 +37,7 @@ namespace Skyline\HTML\Form;
 use Skyline\HTML\Element;
 use Skyline\HTML\ElementInterface;
 use Skyline\HTML\Form\Control\ControlInterface;
+use Skyline\HTML\Form\Control\Verification\VerificationControlInterface;
 use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
 use Skyline\HTML\Form\Exception\FormValidationException;
 use Skyline\HTML\Form\Style\StyleMapInterface;
@@ -65,7 +66,13 @@ class FormElement extends Element implements ElementInterface
 
     private $valid = false;
     private $validated = false;
+    private $verified = false;
+
     private $alwaysDisplayValidationFeedbacks = false;
+
+    /** @var VerificationControlInterface */
+    private $verificationControl;
+    private $verificationControlOptions;
 
     /**
      * @var StyleMapInterface|null
@@ -85,6 +92,15 @@ class FormElement extends Element implements ElementInterface
 
     public function appendElement(ElementInterface $childElement)
     {
+        if($childElement instanceof VerificationControlInterface) {
+            if($this->verificationControl) {
+                trigger_error("Only accepts one verification control", E_USER_WARNING);
+                return;
+            }
+
+            $this->verificationControl = $childElement;
+        }
+
         parent::appendElement($childElement);
         if($childElement instanceof ControlInterface)
             $childElement->setForm($this);
@@ -157,7 +173,13 @@ class FormElement extends Element implements ElementInterface
 
     public function setDataFromRequest(Request $request) {
         $data = [];
-        foreach($request->request as $key => $value) $data[$key] = $value;
+        foreach($request->request as $key => $value) {
+            if($key == '__skyline_verification__') {
+                $this->verificationControlOptions = unserialize( base64_decode( $value ) );
+                continue;
+            }
+            $data[$key] = $value;
+        }
 
         $this->setData($data);
     }
@@ -215,6 +237,11 @@ class FormElement extends Element implements ElementInterface
                 }
             }
         }
+
+        if(!$list && $this->getVerificationControl()) {
+            $this->verified = $this->getVerificationControl()->verifyWithOptions( $this->verificationControlOptions ?? [] );
+        }
+
         return $list;
     }
 
@@ -307,6 +334,22 @@ class FormElement extends Element implements ElementInterface
     }
 
     /**
+     * @return VerificationControlInterface
+     */
+    public function getVerificationControl(): VerificationControlInterface
+    {
+        return $this->verificationControl;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVerified(): bool
+    {
+        return $this->verified;
+    }
+
+    /**
      * @return ControlInterface|null
      */
     public function getControlInFocus(): ?ControlInterface
@@ -331,6 +374,21 @@ class FormElement extends Element implements ElementInterface
 
     public function getHiddenValue(string $name) {
         return $this->hiddenValues[$name] ?? NULL;
+    }
+
+    public function toString(int $indention = 0): string
+    {
+        $this->setHiddenValue("__skyline_verification__", NULL);
+
+        if($vc = $this->getVerificationControl()) {
+            $values = $vc->prepareVerificationOptions();
+            if($values) {
+                $data = base64_encode(serialize($values));
+                $this->setHiddenValue('__skyline_verification__', $data);
+            }
+        }
+
+        return parent::toString($indention);
     }
 
     protected function stringifyStart(int $indention = 0): string

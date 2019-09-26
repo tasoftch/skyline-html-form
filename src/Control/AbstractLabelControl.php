@@ -92,7 +92,14 @@ abstract class AbstractLabelControl extends AbstractControl
         return NULL;
     }
 
-
+    protected function buildControl(): ElementInterface
+    {
+        $control = parent::buildControl();
+        if($this->containerElement && $desc = $this->getDescription()) {
+            $control["aria-describedby"] = $control["id"] . "-help";
+        }
+        return $control;
+    }
 
     /**
      * Builds the description element

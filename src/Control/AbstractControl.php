@@ -324,6 +324,24 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         }
 
         $this->controlElement = $control = $this->buildControl();
+
+        if($map = $this->getForm()->getStyleClassMap()) {
+            if($map instanceof AdvancedStyleMapInterface) {
+                $control = $map->styleUpElement($control, AdvancedStyleMapInterface::CONTROL_ELEMENT, $this);
+            } else {
+                $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_STYLE );
+                if($this->isRequired())
+                    $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_REQUIRED_STYLE );
+                if($this->isValidated()) {
+                    if($this->isValid())
+                        $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_VALID_STYLE );
+                    else
+                        $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_INVALID_STYLE );
+                }
+                $control["class"] = implode(" ", $classes);
+            }
+        }
+
         $this->buildFinalContainer($element, $control, $context, $info);
 
         $this->renderContext = NULL;
@@ -411,24 +429,6 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         $control["id"] = $this->getID();
 
         $control["name"] = $this->getName();
-
-        if($map = $this->getForm()->getStyleClassMap()) {
-            if($map instanceof AdvancedStyleMapInterface) {
-                $control = $map->styleUpElement($control, AdvancedStyleMapInterface::CONTROL_ELEMENT, $this);
-            } else {
-                $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_STYLE );
-                if($this->isRequired())
-                    $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_REQUIRED_STYLE );
-                if($this->isValidated()) {
-                    if($this->isValid())
-                        $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_VALID_STYLE );
-                    else
-                        $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_INVALID_STYLE );
-                }
-                $control["class"] = implode(" ", $classes);
-            }
-        }
-
 
         foreach($this->getAttributes() as $key => $value)
             $control[$key] = $value;

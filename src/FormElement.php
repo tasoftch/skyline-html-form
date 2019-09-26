@@ -334,9 +334,9 @@ class FormElement extends Element implements ElementInterface
     }
 
     /**
-     * @return VerificationControlInterface
+     * @return VerificationControlInterface|null
      */
-    public function getVerificationControl(): VerificationControlInterface
+    public function getVerificationControl(): ?VerificationControlInterface
     {
         return $this->verificationControl;
     }

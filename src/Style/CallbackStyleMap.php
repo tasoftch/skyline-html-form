@@ -35,7 +35,7 @@
 namespace Skyline\HTML\Form\Style;
 
 
-class CallbackStyleMap extends AbstractStyleMap
+class CallbackStyleMap extends AbstractStaticStyleMap
 {
     /** @var callable */
     private $callback;
@@ -57,16 +57,19 @@ class CallbackStyleMap extends AbstractStyleMap
         return $this->callback;
     }
 
-    protected function loadStyles(): array
+
+    /**
+     * @inheritDoc
+     */
+    public function getStyleClass(string $style, string $objectClass = NULL): ?string
     {
-        return [];
+        return call_user_func($this->getCallback(), $style, $objectClass);
     }
 
-    public function getStyleClass(string $style): ?string
-    {
-        return call_user_func($this->getCallback(), $style);
-    }
-
+    /**
+     * @param $name
+     * @return bool
+     */
     public function hasStyle($name)
     {
         return $this->getStyleClass($name) ? true : false;

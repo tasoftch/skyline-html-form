@@ -35,8 +35,12 @@
 namespace Skyline\HTML\Form\Style;
 
 
-class StaticStyleMap extends AbstractStyleMap
+class StaticStyleMap extends AbstractStaticStyleMap
 {
+    const DEFAULT_STYLE = 'default';
+
+    protected $styles;
+
     /**
      * StaticStyleMap constructor.
      * @param array $myStyles
@@ -46,10 +50,34 @@ class StaticStyleMap extends AbstractStyleMap
         $this->styles = $myStyles;
     }
 
-
-    protected function loadStyles(): array
+    /**
+     * @inheritDoc
+     */
+    public function getStyleClass(string $style, string $objectClass = NULL): ?string
     {
-        // Never called
-        return [];
+        $style = $this->getStyles()[$style] ?? NULL;
+        if(is_array($style)) {
+            $default = $style[ static::DEFAULT_STYLE ] ?? NULL;
+            return $style[ $objectClass ] ?? $default;
+        }
+        return $style;
+    }
+
+    /**
+     * Checks if a style exists in the map
+     *
+     * @param $name
+     * @return bool
+     */
+    public function hasStyle($name) {
+        return isset($this->styles[$name]);
+    }
+
+    /**
+     * Get all styles
+     * @return array
+     */
+    public function getStyles(): array {
+        return $this->styles;
     }
 }

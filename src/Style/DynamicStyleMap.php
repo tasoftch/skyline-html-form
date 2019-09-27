@@ -37,16 +37,52 @@ namespace Skyline\HTML\Form\Style;
 
 class DynamicStyleMap extends StaticStyleMap
 {
+    /**
+     * DynamicStyleMap constructor. Styles are optional
+     * @param array|NULL $myStyles
+     */
     public function __construct(array $myStyles = NULL)
     {
         parent::__construct($myStyles ?? []);
     }
 
+    /**
+     * Add a new style
+     *
+     * @param $name
+     * @param $className
+     */
     public function addStyle($name, $className) {
         $this->styles[$name] = $className;
     }
 
+    /**
+     * Remove a style
+     * @param $name
+     */
     public function removeStyle($name) {
         unset($this->styles[$name]);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getStyles(): array
+    {
+        $styles = parent::getStyles();
+        if(NULL === $styles)
+            $this->styles = $this->loadStyles();
+        return $this->styles;
+    }
+
+    /**
+     * Loads the build-in styles
+     * This method is only called once
+     *
+     * @return array
+     */
+    protected function loadStyles(): array
+    {
+        return [];
     }
 }

@@ -34,6 +34,9 @@
 
 namespace Skyline\HTML\Form\Style;
 
+use Skyline\HTML\ElementInterface;
+use Skyline\HTML\Form\Control\ControlInterface;
+
 /**
  * A stylemap can be used to customize control's style while rendering
  *
@@ -41,34 +44,25 @@ namespace Skyline\HTML\Form\Style;
  */
 interface StyleMapInterface
 {
-    const FORM_VALIDATED_STYLE = 'form.validated';
-    const FORM_VALID_STYLE = 'form.valid';
-    const FORM_INVALID_STYLE = 'form.invalid';
+    const FORM_ELEMENT = 'form';
+    const CONTAINER_ELEMENT = 'container';
+    const CONTROL_ELEMENT = 'control';
+    const LABEL_ELEMENT = 'label';
+    const DESCRIPTION_ELEMENT = 'description';
 
-    const CONTAINER_STYLE = 'container';
+    const FEEDBACK_VALID_ELEMENT = 'valid-feedback';
+    const FEEDBACK_INVALID_ELEMENT = 'invalid-feedback';
 
-    const CONTROL_STYLE = 'control';
-    const CONTROL_REQUIRED_STYLE = 'control.required';
-
-    const CONTROL_LABEL_STYLE = 'control.label';
-    const CONTROL_DESCRIPTION_STYLE = 'control.description';
-    const CONTROL_VALID_STYLE = 'control.valid';
-    const CONTROL_INVALID_STYLE = 'control.invalid';
-
-    const FEEDBACK_VALID_STYLE = 'feedback.valid';
-    const FEEDBACK_INVALID_STYLE = 'feedback.invalid';
 
     /**
-     * get mapped style class
+     * Style maps implementing this interface are able to customize the whole element even replacing it with something new.
+     * Take care to not mixup the structure too much.
+     * If $control is null, the form is passed to style up.
      *
-     * @param string $style
-     * @return string|null
+     * @param ElementInterface $element
+     * @param string $elementName
+     * @param ControlInterface|null $control
+     * @return ElementInterface
      */
-    public function getStyleClass(string $style): ?string;
-
-    /**
-     * @param array $styles
-     * @return string|null
-     */
-    public function getStyleClasses(array $styles): ?string;
+    public function styleUpElement(ElementInterface $element, string $elementName, ?ControlInterface $control): ElementInterface;
 }

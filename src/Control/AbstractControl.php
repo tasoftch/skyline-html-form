@@ -40,8 +40,6 @@ use Skyline\HTML\Element;
 use Skyline\HTML\ElementInterface;
 use Skyline\HTML\Form\Exception\FormValidationException;
 use Skyline\HTML\Form\FormElement;
-use Skyline\HTML\Form\Style\AdvancedStyleMapInterface;
-use Skyline\HTML\Form\Style\StyleMapInterface;
 use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
 use Skyline\HTML\Form\Validator\ValidatorInterface;
 use Skyline\HTML\TextContentElement;
@@ -328,33 +326,18 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         $this->containerElement = $element = $this->buildInitialElement();
         if($noEl = $element ? false : true) {
             $element = new Element("d", true);
-        } elseif($map = $this->getForm()->getStyleClassMap()) {
-            if($map instanceof AdvancedStyleMapInterface)
-                $element = $map->styleUpElement($element, AdvancedStyleMapInterface::CONTAINER_ELEMENT, $this);
-            else
-                $element["class"] = $map->getStyleClass( StyleMapInterface::CONTAINER_STYLE );
         }
 
         $this->controlElement = $control = $this->buildControl();
 
         if($map = $this->getForm()->getStyleClassMap()) {
-            if($map instanceof AdvancedStyleMapInterface) {
-                $control = $map->styleUpElement($control, AdvancedStyleMapInterface::CONTROL_ELEMENT, $this);
-            } else {
-                $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_STYLE );
-                if($this->isRequired())
-                    $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_REQUIRED_STYLE );
-                if($this->isValidated()) {
-                    if($this->isValid())
-                        $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_VALID_STYLE );
-                    else
-                        $classes[] = $map->getStyleClass( StyleMapInterface::CONTROL_INVALID_STYLE );
-                }
-                $control["class"] = implode(" ", $classes);
-            }
+            $control = $map->styleUpElement($control, $map::CONTROL_ELEMENT, $this);
         }
 
         $this->buildFinalContainer($element, $control, $context, $info);
+        if($map) {
+            $element = $map->styleUpElement($element, $map::CONTAINER_ELEMENT, NULL);
+        }
 
         $this->renderContext = NULL;
         $this->renderInformation = NULL;
@@ -397,10 +380,7 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
             if($this->getForm()->isAlwaysDisplayValidationFeedbacks() || ($this->isValidated() && $this->isValid())) {
                 $element = new TextContentElement("div", $this->getValidFeedback() ?? "");
                 if($map = $this->getForm()->getStyleClassMap()) {
-                    if($map instanceof AdvancedStyleMapInterface)
-                        $element = $map->styleUpElement($element, AdvancedStyleMapInterface::FEEDBACK_ELEMENT, $this);
-                    else
-                        $element['class'] = $map->getStyleClass( StyleMapInterface::FEEDBACK_VALID_STYLE );
+                    $element = $map->styleUpElement($element, $map::FEEDBACK_VALID_ELEMENT, $this);
                 }
                 return $element;
             }
@@ -418,10 +398,7 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
             if($this->getForm()->isAlwaysDisplayValidationFeedbacks() || ($this->isValidated() && !$this->isValid())) {
                 $element = new TextContentElement("div", $this->getInvalidFeedback() ?? "");
                 if($map = $this->getForm()->getStyleClassMap()) {
-                    if($map instanceof AdvancedStyleMapInterface)
-                        $element = $map->styleUpElement($element, AdvancedStyleMapInterface::FEEDBACK_ELEMENT, $this);
-                    else
-                        $element['class'] = $map->getStyleClass( StyleMapInterface::FEEDBACK_INVALID_STYLE );
+                    $element = $map->styleUpElement($element, $map::FEEDBACK_INVALID_ELEMENT, $this);
                 }
                 return $element;
             }

@@ -213,15 +213,9 @@ class FormElement extends Element implements ElementInterface
         $valid = $this->valid = true;
         $this->validated = true;
 
-        if($map = $this->getStyleClassMap())
-            $this["class"] = $map->getStyleClasses([ StyleMapInterface::FORM_VALIDATED_STYLE, StyleMapInterface::FORM_VALID_STYLE ]);
-
-        $invalidate = function(ControlInterface $element) use (&$list, &$valid, $map ) {
+        $invalidate = function(ControlInterface $element) use (&$list, &$valid ) {
             $valid = $this->valid = false;
             $list[ $element->getName() ] = $element;
-            if($map) {
-                $this["class"] = $map->getStyleClasses([ StyleMapInterface::FORM_VALIDATED_STYLE, StyleMapInterface::FORM_INVALID_STYLE ]);
-            }
         };
 
         foreach($this->getChildElements() as $element) {
@@ -248,6 +242,10 @@ class FormElement extends Element implements ElementInterface
 
                 $invalidate($vc);
             }
+        }
+
+        if($map = $this->getStyleClassMap()) {
+            $map->styleUpElement($this, $map::FORM_ELEMENT, NULL);
         }
 
         return $list;

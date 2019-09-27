@@ -39,7 +39,7 @@ use Skyline\HTML\ElementInterface;
 use Skyline\HTML\Form\Control\ControlInterface;
 use Skyline\HTML\Form\FormElement;
 
-abstract class AbstractStaticStyleMap implements StyleMapInterface
+abstract class AbstractStaticStyleMap extends AbstractStyleMap
 {
     const FORM_VALIDATED_STYLE = 'form.validated';
     const FORM_VALID_STYLE = 'form.valid';
@@ -70,23 +70,20 @@ abstract class AbstractStaticStyleMap implements StyleMapInterface
         };
 
         if($elementName == static::FORM_ELEMENT) {
-            /** @var FormElement $element */
-            if($element->isValidated()) {
+            if($this->isFormValidated($element)) {
                 $classes[] = $cget(static::FORM_VALIDATED_STYLE);
-                $classes[] = $cget($element->isValid() ? static::FORM_VALID_STYLE : static::FORM_INVALID_STYLE);
+                $classes[] = $cget($this->isFormValid($element) ? static::FORM_VALID_STYLE : static::FORM_INVALID_STYLE);
             }
         } elseif($elementName == static::CONTAINER_ELEMENT) {
             $classes[] = $cget(static::CONTAINER_STYLE);
         } elseif($elementName == static::CONTROL_ELEMENT) {
             $classes[] = $cget(static::CONTROL_STYLE);
 
-            if(method_exists($control, 'isRequired') && $control->isRequired())
+            if($this->isControlRequired($control))
                 $classes[] = $cget(static::CONTROL_REQUIRED_STYLE);
-            if(method_exists($control, 'isValidated') && $control->isValidated()) {
+            if($this->isControlValidated($control)) {
                 $classes[] = $cget(static::CONTROL_VALIDATED_STYLE);
-                if(method_exists($control, 'isValid')) {
-                    $classes[] = $cget($control->isValid() ? static::CONTROL_VALID_STYLE : static::CONTROL_INVALID_STYLE);
-                }
+                $classes[] = $cget($this->isControlValid($control) ? static::CONTROL_VALID_STYLE : static::CONTROL_INVALID_STYLE);
             }
         } elseif($elementName == static::LABEL_ELEMENT) {
             $classes[] = $cget(static::CONTROL_LABEL_STYLE);

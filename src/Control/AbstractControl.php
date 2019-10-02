@@ -336,7 +336,7 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
 
         $this->buildFinalContainer($element, $control, $context, $info);
         if($map) {
-            $element = $map->styleUpElement($element, $map::CONTAINER_ELEMENT, NULL);
+            $element = $map->styleUpElement($element, $map::CONTAINER_ELEMENT, $this);
         }
 
         $this->renderContext = NULL;

@@ -39,6 +39,7 @@ use Skyline\HTML\Element;
 use Skyline\HTML\ElementInterface;
 use Skyline\HTML\Form\Control\AbstractLabelControl;
 use Skyline\HTML\Form\Control\DefaultContainerBuilderTrait;
+use Skyline\HTML\Form\Control\Option\Provider\OptionProviderInterface;
 use Skyline\HTML\TextContentElement;
 
 class PopUpControl extends AbstractLabelControl implements OptionValuesInterface
@@ -50,6 +51,8 @@ class PopUpControl extends AbstractLabelControl implements OptionValuesInterface
     private $options = [];
     /** @var string|null */
     private $nullPlaceholder;
+    /** @var OptionProviderInterface|null */
+    private $optionProvider;
 
     public function setOption(string $id, $optionValue, $optionGroup = NULL)
     {
@@ -84,14 +87,36 @@ class PopUpControl extends AbstractLabelControl implements OptionValuesInterface
         $this->nullPlaceholder = $nullPlaceholder;
     }
 
+    /**
+     * @return OptionProviderInterface|null
+     */
+    public function getOptionProvider(): ?OptionProviderInterface
+    {
+        return $this->optionProvider;
+    }
+
+    /**
+     * @param OptionProviderInterface|null $optionProvider
+     */
+    public function setOptionProvider(?OptionProviderInterface $optionProvider): void
+    {
+        $this->optionProvider = $optionProvider;
+    }
+
     protected function getGroupedOptions(): array {
         $options = [];
 
-        foreach($this->options as $id => $option) {
-            $label = $option[0];
-            $group = $option[1];
+        if($op = $this->getOptionProvider()) {
+            foreach($op->yieldOptions($group) as $id => $option) {
+                $options[$group][$id] = $option;
+            }
+        } else {
+            foreach($this->options as $id => $option) {
+                $label = $option[0];
+                $group = $option[1];
 
-            $options[$group][$id] = $label;
+                $options[$group][$id] = $label;
+            }
         }
 
         foreach($options as $group => &$option)

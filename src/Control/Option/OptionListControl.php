@@ -38,6 +38,7 @@ use Skyline\HTML\Element;
 use Skyline\HTML\ElementInterface;
 use Skyline\HTML\Form\Control\AbstractLabelControl;
 use Skyline\HTML\Form\Control\DefaultContainerBuilderTrait;
+use Skyline\HTML\Form\Control\Option\Provider\OptionProviderInterface;
 use Skyline\HTML\TextContentElement;
 
 
@@ -51,6 +52,9 @@ class OptionListControl extends AbstractLabelControl implements OptionValuesInte
 
     private $options = [];
 
+    /** @var OptionProviderInterface|null */
+    private $optionProvider;
+
     public function setOption(string $id, $optionValue, $optionGroup = NULL)
     {
         $this->options[$id] = $optionValue;
@@ -61,12 +65,33 @@ class OptionListControl extends AbstractLabelControl implements OptionValuesInte
         return $this->options[$id] ?? NULL;
     }
 
+    /**
+     * @return OptionProviderInterface|null
+     */
+    public function getOptionProvider(): ?OptionProviderInterface
+    {
+        return $this->optionProvider;
+    }
+
+    /**
+     * @param OptionProviderInterface|null $optionProvider
+     */
+    public function setOptionProvider(?OptionProviderInterface $optionProvider): void
+    {
+        $this->optionProvider = $optionProvider;
+    }
+
     protected function buildControl(): ElementInterface
     {
         $control = new Element("div");
         $control["class"] = 'option-list';
 
-        foreach($this->options as $optID => $option) {
+        if($op = $this->getOptionProvider())
+            $options = $op->yieldOptions($grp);
+        else
+            $options = $this->options;
+
+        foreach($options as $optID => $option) {
             $e = $this->buildOptionElement($optID, $option);
             $control->appendElement($e);
         }

@@ -15,6 +15,7 @@
   },
   "require" : {
     "php": "^7.2",
+    "ext-pdo" : "*",
     "skyline/html-elements": "dev-master"
   },
   "require-dev": {

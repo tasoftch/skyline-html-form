@@ -35,29 +35,12 @@
 namespace Skyline\HTML\Form\Validator;
 
 
-use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
-
-abstract class AbstractValidator implements ValidatorInterface, ValidatorAwareInterface
+interface ValidatorAwareInterface
 {
-    protected $validatorName = 'validator';
-
     /**
-     * @inheritDoc
-     */
-    public function getValidatorName(): string
-    {
-        return $this->validatorName;
-    }
-
-
-    /**
-     * Internal method to stop the current form validation.
+     * Provides a name that identifies this validator
      *
-     * @param bool $success
+     * @return string
      */
-    protected function stopValidation(bool $success) {
-        $e = new _InternOptionalCancelException();
-        $e->success = $success;
-        throw $e;
-    }
+    public function getValidatorName(): string;
 }

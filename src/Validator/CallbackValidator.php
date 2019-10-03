@@ -44,6 +44,16 @@ class CallbackValidator extends AbstractConditionalValidator
     private $callback;
 
     /**
+     * @param string $validatorName
+     * @return static
+     */
+    public function setValidatorName(string $validatorName)
+    {
+        $this->validatorName = $validatorName;
+        return $this;
+    }
+
+    /**
      * CallbackValidator constructor.
      * @param callable $callback
      */

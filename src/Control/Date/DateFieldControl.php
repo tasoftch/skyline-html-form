@@ -39,7 +39,7 @@ use Skyline\HTML\Form\Control\Text\TextFieldControl;
 
 class DateFieldControl extends TextFieldControl
 {
-    private $dateFormat = 'dd.mm.YYYY';
+    private $dateFormat = 'd.m.Y';
 
     /**
      * @return string
@@ -65,11 +65,11 @@ class DateFieldControl extends TextFieldControl
         parent::setValue($value);
     }
 
-    public function offsetSet($offset, $value)
+    protected function convertValueToHTML($value)
     {
-        if(strcasecmp($offset, 'value') == 0 && $value instanceof \DateTime) {
+        if($value instanceof \DateTime) {
             $value = $value->format( $this->getDateFormat() );
         }
-        parent::offsetSet($offset, $value);
+        return $value;
     }
 }

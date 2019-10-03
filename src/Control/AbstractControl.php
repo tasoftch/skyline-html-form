@@ -423,12 +423,22 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
             $control[$key] = $value;
 
         if($v = $this->getValue())
-            $control["value"] = $v;
+            $control["value"] = $this->convertValueToHTML($v);
 
         if(!$this->isEnabled())
             $control["disabled"] = 'disabled';
 
         return $control;
+    }
+
+    /**
+     * Converts a value to html if needed
+     *
+     * @param $value
+     * @return mixed
+     */
+    protected function convertValueToHTML($value) {
+        return $value;
     }
 
     /**

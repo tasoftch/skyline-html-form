@@ -32,33 +32,29 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Feedback;
 
 
-use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
+use Skyline\HTML\Form\Validator\ValidatorAwareInterface;
+use Skyline\HTML\Form\Validator\ValidatorInterface;
 
-abstract class AbstractValidator implements ValidatorInterface, ValidatorAwareInterface
+interface ManualFeedbackInterface
 {
-    /** @var string|null */
-    protected $validatorName;
-
     /**
-     * @inheritDoc
-     */
-    public function getValidatorName(): string
-    {
-        return $this->validatorName ?? get_class($this);
-    }
-
-
-    /**
-     * Internal method to stop the current form validation.
+     * If this feedback is used for valid controls, this method must return true, otherwise false.
      *
-     * @param bool $success
+     * @return bool
      */
-    protected function stopValidation(bool $success) {
-        $e = new _InternOptionalCancelException();
-        $e->success = $success;
-        throw $e;
-    }
+    public function isValidFeedback(): bool;
+
+    /**
+     * @param ValidatorAwareInterface|ValidatorInterface|null $validator
+     * @return bool
+     */
+    public function matchForValidator($validator): bool;
+
+    /**
+     * This method is called to produce the manual html output if this feedback matches
+     */
+    public function makeOutput();
 }

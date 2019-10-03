@@ -32,33 +32,64 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Feedback;
 
 
-use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
+use Skyline\HTML\Form\Validator\ValidatorAwareInterface;
 
-abstract class AbstractValidator implements ValidatorInterface, ValidatorAwareInterface
+class InvalidFeedback implements ManualFeedbackInterface
 {
-    /** @var string|null */
-    protected $validatorName;
+    /** @var string */
+    private $validatorName;
+
+    /** @var callable */
+    private $callback;
 
     /**
-     * @inheritDoc
+     * ValidFeedback constructor.
+     * @param string $validatorName
+     * @param callable $callback
      */
-    public function getValidatorName(): string
+    public function __construct(string $validatorName, callable $callback)
     {
-        return $this->validatorName ?? get_class($this);
+        $this->validatorName = $validatorName;
+        $this->callback = $callback;
     }
 
 
     /**
-     * Internal method to stop the current form validation.
-     *
-     * @param bool $success
+     * @return string
      */
-    protected function stopValidation(bool $success) {
-        $e = new _InternOptionalCancelException();
-        $e->success = $success;
-        throw $e;
+    public function getValidatorName(): string
+    {
+        return $this->validatorName;
+    }
+
+    /**
+     * @return callable
+     */
+    public function getCallback(): callable
+    {
+        return $this->callback;
+    }
+
+    public function isValidFeedback(): bool
+    {
+        return false;
+    }
+
+    public function matchForValidator($validator): bool
+    {
+        if($validator instanceof ValidatorAwareInterface) {
+            if($validator->getValidatorName() == $this->getValidatorName())
+                return true;
+        }
+
+        return $this->getValidatorName() == get_class($validator);
+    }
+
+    public function makeOutput()
+    {
+        echo call_user_func($this->getCallback());
     }
 }

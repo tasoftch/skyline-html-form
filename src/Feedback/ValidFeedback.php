@@ -32,33 +32,14 @@
  *
  */
 
-namespace Skyline\HTML\Form\Validator;
+namespace Skyline\HTML\Form\Feedback;
 
 
-use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
 
-abstract class AbstractValidator implements ValidatorInterface, ValidatorAwareInterface
+class ValidFeedback extends InvalidFeedback
 {
-    /** @var string|null */
-    protected $validatorName;
-
-    /**
-     * @inheritDoc
-     */
-    public function getValidatorName(): string
+    public function isValidFeedback(): bool
     {
-        return $this->validatorName ?? get_class($this);
-    }
-
-
-    /**
-     * Internal method to stop the current form validation.
-     *
-     * @param bool $success
-     */
-    protected function stopValidation(bool $success) {
-        $e = new _InternOptionalCancelException();
-        $e->success = $success;
-        throw $e;
+        return true;
     }
 }

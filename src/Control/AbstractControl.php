@@ -38,6 +38,7 @@ namespace Skyline\HTML\Form\Control;
 use Skyline\HTML\AbstractInlineBuildElement;
 use Skyline\HTML\Element;
 use Skyline\HTML\ElementInterface;
+use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
 use Skyline\HTML\Form\Exception\FormValidationException;
 use Skyline\HTML\Form\FormElement;
 use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
@@ -81,7 +82,7 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
     private $valid = false;
     private $validated = false;
     /** @var ValidatorInterface|null */
-    private $invalidValidator;
+    private $stoppedValidator;
 
     private $validFeedback = "";
     private $invalidFeedback = '';
@@ -219,12 +220,16 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
             try {
                 if($validator->validateValue($value) === false) {
                     $this->valid = false;
-                    $this->invalidValidator = $validator;
+                    $this->stoppedValidator = $validator;
                     return false;
                 }
             } catch (FormValidationException $exception) {
                 $this->valid = false;
-                $this->invalidValidator = $validator;
+                $this->stoppedValidator = $validator;
+                throw $exception;
+            } catch (_InternOptionalCancelException $exception) {
+                $this->valid = $exception->success;
+                $this->stoppedValidator = $validator;
                 throw $exception;
             }
 
@@ -252,9 +257,9 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
     /**
      * @return ValidatorInterface|null
      */
-    public function getInvalidValidator(): ?ValidatorInterface
+    public function getStoppedValidator(): ?ValidatorInterface
     {
-        return $this->invalidValidator;
+        return $this->stoppedValidator;
     }
 
     /**

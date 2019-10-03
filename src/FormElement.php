@@ -41,6 +41,7 @@ use Skyline\HTML\Form\Control\ControlInterface;
 use Skyline\HTML\Form\Control\Verification\VerificationControlInterface;
 use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
 use Skyline\HTML\Form\Exception\FormValidationException;
+use Skyline\HTML\Form\Feedback\ManualFeedbackInterface;
 use Skyline\HTML\Form\Style\StyleMapInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -480,6 +481,28 @@ class FormElement extends Element implements ElementInterface
             return $control;
         }
         return NULL;
+    }
+
+    /**
+     * Helper method to select a feedback pattern
+     *
+     * @param string $controlName
+     * @param ManualFeedbackInterface ...$feedbacks
+     */
+    public function manualBuildValidationFeedback(string $controlName, ManualFeedbackInterface ...$feedbacks) {
+        if(($control = $this->getControlByName($controlName)) && $control instanceof AbstractControl) {
+            if($control->isValidated()) {
+                foreach ($feedbacks as $feedback) {
+                    if(
+                    ($feedback->isValidFeedback() && $control->isValid() && $feedback->matchForValidator( $control->getStoppedValidator() )) ||
+                    (!$feedback->isValidFeedback() && !$control->isValid() && $feedback->matchForValidator( $control->getStoppedValidator() ))
+                    ) {
+                        $feedback->makeOutput();
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     /**

@@ -145,6 +145,10 @@ class PopUpControl extends AbstractLabelControl implements OptionValuesInterface
     {
         $control = parent::buildControl();
 
+        if($null = $this->getNullPlaceholder()) {
+            $e = $this->buildOptionElement(static::NULL_VALUE_MARKER, $null);
+            $control->appendElement($e);
+        }
         foreach($this->getGroupedOptions() as $group => $options) {
             if($group) {
                 $e = $this->buildOptionGroup($group, $options);

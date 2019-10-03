@@ -382,6 +382,32 @@ class FormElement extends Element implements ElementInterface
         return $this->hiddenValues[$name] ?? NULL;
     }
 
+
+    public function manualBuildForm(callable $contentBlock, int $indention = 0) {
+        echo $this->stringifyStart($indention);
+        call_user_func($contentBlock);
+        echo $this->stringifyEnd($indention);
+    }
+
+    public function manualBuildControl(string $name, array $additionalAttributes = []) {
+        if(($control = $this->getControlByName($name)) && $control instanceof AbstractControl) {
+            $old = [];
+            foreach($additionalAttributes as $name => $attrs) {
+                $old[$name] = $control[$name];
+                $control[$name] = is_array($attrs) ? implode(" ", $attrs) : $attrs;
+            }
+
+            (function()use($control){
+                /** @noinspection Annotator */
+                echo $control->buildControl();})->bindTo($control, get_class($control))();
+
+            foreach($old as $name => $attrs) {
+                $control[$name] = $attrs;
+            }
+        }
+    }
+
+
     public function toString(int $indention = 0): string
     {
         $this->setHiddenValue("__skyline_verification__", NULL);

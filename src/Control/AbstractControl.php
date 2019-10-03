@@ -80,6 +80,8 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
 
     private $valid = false;
     private $validated = false;
+    /** @var ValidatorInterface|null */
+    private $invalidValidator;
 
     private $validFeedback = "";
     private $invalidFeedback = '';
@@ -217,10 +219,12 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
             try {
                 if($validator->validateValue($value) === false) {
                     $this->valid = false;
+                    $this->invalidValidator = $validator;
                     return false;
                 }
             } catch (FormValidationException $exception) {
                 $this->valid = false;
+                $this->invalidValidator = $validator;
                 throw $exception;
             }
 
@@ -243,6 +247,14 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
     public function isValid(): bool
     {
         return $this->valid;
+    }
+
+    /**
+     * @return ValidatorInterface|null
+     */
+    public function getInvalidValidator(): ?ValidatorInterface
+    {
+        return $this->invalidValidator;
     }
 
     /**

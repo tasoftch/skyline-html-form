@@ -36,10 +36,20 @@ namespace Skyline\HTML\Form\Control\Date;
 
 
 use Skyline\HTML\Form\Control\Text\TextFieldControl;
+use Skyline\HTML\Form\Validator\CallbackValidator;
 
 class DateFieldControl extends TextFieldControl
 {
     private $dateFormat = 'd.m.Y';
+    private $_setValueFailed = false;
+
+    public function __construct(string $name, string $id = NULL, string $type = self::TYPE_TEXT)
+    {
+        parent::__construct($name, $id, $type);
+        $this->addValidator(new CallbackValidator(function() {
+            return !$this->_setValueFailed;
+        }));
+    }
 
     /**
      * @return string
@@ -59,8 +69,13 @@ class DateFieldControl extends TextFieldControl
 
     public function setValue($value): void
     {
-        if(!($value instanceof \DateTime)) {
-            $value = new \DateTime($value);
+        if(!($value instanceof \DateTime) && $value) {
+            try {
+                $value = new \DateTime($value);
+            } catch (\Exception $e) {
+                $this->_setValueFailed = true;
+                error_clear_last();
+            }
         }
         parent::setValue($value);
     }

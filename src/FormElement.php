@@ -400,6 +400,12 @@ class FormElement extends Element implements ElementInterface
         $this->controlFocus = $controlFocus;
     }
 
+    /**
+     * Define values that are not visible for the user, but sent with the form
+     *
+     * @param string $name
+     * @param $value
+     */
     public function setHiddenValue(string $name, $value) {
         if($value === NULL)
             unset($this->hiddenValues[$name]);
@@ -407,17 +413,45 @@ class FormElement extends Element implements ElementInterface
             $this->hiddenValues[$name] = $value;
     }
 
+    /**
+     * @param string $name
+     * @return mixed|null
+     */
     public function getHiddenValue(string $name) {
         return $this->hiddenValues[$name] ?? NULL;
     }
 
-
+    /**
+     * If you want to design your own form, just use its basic features.
+     * Calling this method requires a callback that outputs html code including the form controls.
+     * The following workflow is done:
+     * 1.  The CSRF token is printed if available
+     * 2.  The hidden values are listed in <input type="hidden" .... /> html tags
+     * 3.  Your callback is invoked
+     * 4.  The focus is set using javascript
+     *
+     * Inside the callback, use the manualBuildControl method to insert only the controls in your code.
+     *
+     * @param callable $contentBlock
+     * @param int $indention
+     * @see FormElement::manualBuildControl()
+     */
     public function manualBuildForm(callable $contentBlock, int $indention = 0) {
         echo $this->stringifyStart($indention);
         call_user_func($contentBlock);
         echo $this->stringifyEnd($indention);
     }
 
+    /**
+     * Manually builds a control html and outputs it.
+     * Use this method to place your controls directly in the html code used in the callback from manualBuildForm
+     *
+     * @param string $name
+     * @param array $additionalAttributes
+     * @param array $validationClasses
+     * @return AbstractControl|null
+     * @see FormElement::manualBuildForm()
+     */
     public function manualBuildControl(string $name, array $additionalAttributes = [], array $validationClasses = []) {
         if(($control = $this->getControlByName($name)) && $control instanceof AbstractControl) {
             $old = [];
@@ -443,10 +477,14 @@ class FormElement extends Element implements ElementInterface
             foreach($old as $name => $attrs) {
                 $control[$name] = $attrs;
             }
+            return $control;
         }
+        return NULL;
     }
 
-
+    /**
+     * @inheritDoc
+     */
     public function toString(int $indention = 0): string
     {
         $this->setHiddenValue("__skyline_verification__", NULL);
@@ -462,6 +500,9 @@ class FormElement extends Element implements ElementInterface
         return parent::toString($indention);
     }
 
+    /**
+     * @inheritDoc
+     */
     protected function stringifyStart(int $indention = 0): string
     {
         $ind = $this->formatOutput() ? ($this->getIndentionString($indention) . "\t") : '';
@@ -479,6 +520,9 @@ class FormElement extends Element implements ElementInterface
         return $html;
     }
 
+    /**
+     * @inheritDoc
+     */
     protected function stringifyEnd(int $indention = 0): string
     {
         $html = parent::stringifyEnd($indention);

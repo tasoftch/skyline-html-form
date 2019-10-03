@@ -290,7 +290,7 @@ class FormElement extends Element implements ElementInterface
             }
 
             foreach($data as $key => $value) {
-                if($csrfID && $key == $csrf) {
+                if($csrfID && $key == $csrfID) {
                     $this->_sentCsrfToken = $value;
                     continue;
                 }
@@ -418,12 +418,22 @@ class FormElement extends Element implements ElementInterface
         echo $this->stringifyEnd($indention);
     }
 
-    public function manualBuildControl(string $name, array $additionalAttributes = []) {
+    public function manualBuildControl(string $name, array $additionalAttributes = [], array $validationClasses = []) {
         if(($control = $this->getControlByName($name)) && $control instanceof AbstractControl) {
             $old = [];
             foreach($additionalAttributes as $name => $attrs) {
                 $old[$name] = $control[$name];
                 $control[$name] = is_array($attrs) ? implode(" ", $attrs) : $attrs;
+            }
+
+            if($control->isValidated()) {
+                if($control->isValid()) {
+                    $vc = $validationClasses["valid"] ?? 'valid';
+                    $control["class"] .= " $vc";
+                } else {
+                    $vc = $validationClasses["invalid"] ?? 'invalid';
+                    $control["class"] .= " $vc";
+                }
             }
 
             (function()use($control){

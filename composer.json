@@ -19,6 +19,10 @@
     "skyline/html-elements": "dev-master"
   },
   "require-dev": {
-    "phpunit/phpunit": "^6"
+    "phpunit/phpunit": "^6",
+    "symfony/security-csrf": "dev-master"
+  },
+  "suggest": {
+    "symfony/security-csrf": "Add symfony/security-csrf to make your forms secure"
   }
 }

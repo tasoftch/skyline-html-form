@@ -193,6 +193,11 @@ class FormElement extends Element implements ElementInterface
     public function setDataFromRequest(Request $request) {
         $data = [];
         foreach($request->request as $key => $value) {
+            if(strpos($key, "hv://") === 0) {
+                // Is hidden value
+                $this->setHiddenValue(substr($key, 5), $value);
+                continue;
+            }
             if($key == '__skyline_verification__') {
                 $this->verificationControlOptions = unserialize( base64_decode( $value ) );
                 continue;
@@ -538,6 +543,7 @@ class FormElement extends Element implements ElementInterface
         }
 
         foreach($this->hiddenValues as $attr => $value) {
+            $attr = "hv://$attr";
             $html .= sprintf("$ind<input type=\"hidden\" name=\"%s\" value=\"%s\">$nl", htmlspecialchars($attr), htmlspecialchars($value));
         }
         return $html;

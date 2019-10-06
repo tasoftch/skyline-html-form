@@ -89,7 +89,8 @@ class DateFieldControl extends TextFieldControl
     {
         if(!($value instanceof \DateTime) && $value) {
             try {
-                $value = new ($this->getDateObjectClass())($value);
+                $class = $this->getDateObjectClass();
+                $value = new $class($value);
             } catch (\Exception $e) {
                 $this->_setValueFailed = true;
                 error_clear_last();

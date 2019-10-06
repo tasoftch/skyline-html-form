@@ -35,11 +35,11 @@
 namespace Skyline\HTML\Form\Validator;
 
 
-class EmailAddressValidator extends AbstractConditionalValidator
+class IsIntegerValidator extends AbstractConditionalValidator
 {
     public function validateValue($value)
     {
-        if(filter_var($value, FILTER_VALIDATE_EMAIL))
+        if(filter_var($value, FILTER_VALIDATE_INT))
             return true;
         return false;
     }

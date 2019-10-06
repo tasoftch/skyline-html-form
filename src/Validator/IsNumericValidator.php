@@ -35,11 +35,11 @@
 namespace Skyline\HTML\Form\Validator;
 
 
-class URLValidator extends AbstractConditionalValidator
+class IsNumericValidator extends AbstractConditionalValidator
 {
     public function validateValue($value)
     {
-        if(filter_var($value, FILTER_VALIDATE_URL))
+        if(is_numeric($value))
             return true;
         return false;
     }

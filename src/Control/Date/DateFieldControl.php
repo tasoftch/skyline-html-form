@@ -43,12 +43,30 @@ class DateFieldControl extends TextFieldControl
     private $dateFormat = 'd.m.Y';
     private $_setValueFailed = false;
 
+    private $dateObjectClass = \DateTime::class;
+
     public function __construct(string $name, string $id = NULL, string $type = self::TYPE_TEXT)
     {
         parent::__construct($name, $id, $type);
         $this->addValidator(new CallbackValidator(function() {
             return !$this->_setValueFailed;
         }));
+    }
+
+    /**
+     * @return string
+     */
+    public function getDateObjectClass(): string
+    {
+        return $this->dateObjectClass;
+    }
+
+    /**
+     * @param string $dateObjectClass
+     */
+    public function setDateObjectClass(string $dateObjectClass): void
+    {
+        $this->dateObjectClass = $dateObjectClass;
     }
 
     /**
@@ -71,7 +89,7 @@ class DateFieldControl extends TextFieldControl
     {
         if(!($value instanceof \DateTime) && $value) {
             try {
-                $value = new \DateTime($value);
+                $value = new ($this->getDateObjectClass())($value);
             } catch (\Exception $e) {
                 $this->_setValueFailed = true;
                 error_clear_last();

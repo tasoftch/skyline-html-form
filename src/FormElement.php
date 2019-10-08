@@ -443,6 +443,16 @@ class FormElement extends Element implements ElementInterface
      * @see FormElement::manualBuildControl()
      */
     public function manualBuildForm(callable $contentBlock, int $indention = 0) {
+        $this->setHiddenValue("__skyline_verification__", NULL);
+
+        if($vc = $this->getVerificationControl()) {
+            $values = $vc->prepareVerificationOptions();
+            if($values) {
+                $data = base64_encode(serialize($values));
+                $this->setHiddenValue('__skyline_verification__', $data);
+            }
+        }
+
         echo $this->stringifyStart($indention);
         call_user_func($contentBlock);
         echo $this->stringifyEnd($indention);

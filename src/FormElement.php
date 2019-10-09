@@ -190,6 +190,11 @@ class FormElement extends Element implements ElementInterface
         return self::FORM_STATE_NONE;
     }
 
+    /**
+     * Reads the data from a request that was submitted by the form
+     *
+     * @param Request $request
+     */
     public function setDataFromRequest(Request $request) {
         $data = [];
         foreach($request->request as $key => $value) {
@@ -207,6 +212,22 @@ class FormElement extends Element implements ElementInterface
         }
 
         $this->setData($data);
+    }
+
+    /**
+     * Use this method to reset the form to default, as like the client would see it the first time.
+     */
+    public function resetForm() {
+        $this->hiddenValues = [];
+        $this->valid = false;
+        $this->validated = false;
+        $this->verified = false;
+
+        foreach($this->getChildElements() as $control) {
+            if($control instanceof ControlInterface) {
+                $control->reset();
+            }
+        }
     }
 
     /**

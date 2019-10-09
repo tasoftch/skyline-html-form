@@ -75,6 +75,11 @@ interface ControlInterface
     public function validate();
 
     /**
+     * Puts the control to its default, so default value if available and reset validation.
+     */
+    public function reset();
+
+    /**
      * Gets the form
      * @return FormElement|null
      */

@@ -201,6 +201,17 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
     /**
      * @inheritDoc
      */
+    public function reset()
+    {
+        $this->validated = false;
+        $this->valid = false;
+        $this->setValue( NULL );
+        $this->defaultValueUsed = true;
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function validate()
     {
         if($this->skipValidation())

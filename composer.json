@@ -20,11 +20,11 @@
   },
   "require-dev": {
     "phpunit/phpunit": "^6",
-    "symfony/security-csrf": "dev-master",
+    "skyline/security": "dev-master",
     "tasoft/php-pdo": "dev-master"
   },
   "suggest": {
-    "symfony/security-csrf": "Add symfony/security-csrf to make your forms secure",
+    "skyline/security": "Add the Skyline Security package to use secure forms including csrf tokens.",
     "tasoft/php-pdo": "Used for Date and Time text field to allow specified values to directly insert into data base"
   }
 }

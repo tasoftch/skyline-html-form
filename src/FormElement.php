@@ -44,18 +44,10 @@ use Skyline\HTML\Form\Exception\FormValidationException;
 use Skyline\HTML\Form\Feedback\ManualFeedbackInterface;
 use Skyline\HTML\Form\Style\StyleMapInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Symfony\Component\Security\Core\Exception\AuthenticationExpiredException;
-use Symfony\Component\Security\Csrf\CsrfToken;
-use Symfony\Component\Security\Csrf\CsrfTokenManager;
-use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use TASoft\Service\ServiceManager;
 
 class FormElement extends Element implements ElementInterface
 {
-    const CSRF_TOKEN_NAME = 'skyline-csrf-token';
-
-
     /** @var string */
     private $actionName;
     /** @var string */
@@ -90,23 +82,16 @@ class FormElement extends Element implements ElementInterface
      */
     private $styleClassMap;
 
-    /** @var CsrfToken */
-    private $CSRFToken;
-    private $_sentCsrfToken;
-
 
     public function __construct(string $actionName, string $method = 'POST', $identifier = NULL, bool $multipart = false)
     {
         parent::__construct("form", true);
+        $this->setID($identifier);
+
         $this["action"] = $this->actionName = $actionName;
         $this["method"] = $this->method = $method;
         if(($this->multipart = $multipart))
             $this["enctype"] = 'multipart/form-data';
-
-        /** @var CsrfTokenManagerInterface $csrfMan */
-        if($csrfMan = ServiceManager::generalServiceManager()->CSRFManager) {
-            $this->CSRFToken = $csrfMan->getToken(static::CSRF_TOKEN_NAME);
-        }
     }
 
     public function appendElement(ElementInterface $childElement)
@@ -258,15 +243,6 @@ class FormElement extends Element implements ElementInterface
         $valid = $this->valid = true;
         $this->validated = true;
 
-        if($csrf = $this->getCSRFToken()) {
-            /** @var CsrfTokenManagerInterface $csrfMan */
-            $csrfMan = ServiceManager::generalServiceManager()->CSRFManager;
-            if(!$csrfMan->isTokenValid(new CsrfToken(static::CSRF_TOKEN_NAME, $this->_sentCsrfToken))) {
-                $valid = $this->valid = false;
-                throw new AuthenticationException("CSRF field is not valid", 403);
-            }
-        }
-
         $invalidate = function(ControlInterface $element) use (&$list, &$valid ) {
             $valid = $this->valid = false;
             $list[ $element->getName() ] = $element;
@@ -312,17 +288,7 @@ class FormElement extends Element implements ElementInterface
      */
     public function setData($data) {
         if(is_iterable($data)) {
-            $csrfID = NULL;
-            if($csrf = $this->getCSRFToken()) {
-                $csrfID = $csrf->getId();
-            }
-
             foreach($data as $key => $value) {
-                if($csrfID && $key == $csrfID) {
-                    $this->_sentCsrfToken = $value;
-                    continue;
-                }
-
                 if($element = $this->getControlByName($key)) {
                     $element->setValue($value);
                 }
@@ -570,10 +536,6 @@ class FormElement extends Element implements ElementInterface
 
         $html = parent::stringifyStart($indention);
 
-        if($csrf = $this->getCSRFToken()) {
-            $html .= sprintf("$ind<input type=\"hidden\" name=\"%s\" value=\"%s\">$nl", htmlspecialchars( $csrf->getId() ), htmlspecialchars($csrf->getValue()));
-        }
-
         foreach($this->hiddenValues as $attr => $value) {
             $attr = "hv://$attr";
             $html .= sprintf("$ind<input type=\"hidden\" name=\"%s\" value=\"%s\">$nl", htmlspecialchars($attr), htmlspecialchars($value));
@@ -591,21 +553,5 @@ class FormElement extends Element implements ElementInterface
             $html .= "<script type='application/javascript'>document.getElementById('". $focus->getID() . "').focus();</script>";
         }
         return $html;
-    }
-
-    /**
-     * @return CsrfToken|null
-     */
-    public function getCSRFToken(): ?CsrfToken
-    {
-        return $this->CSRFToken;
-    }
-
-    /**
-     * @param CsrfToken $CSRFToken
-     */
-    public function setCSRFToken(CsrfToken $CSRFToken): void
-    {
-        $this->CSRFToken = $CSRFToken;
     }
 }

@@ -86,7 +86,8 @@ class FormElement extends Element implements ElementInterface
     public function __construct(string $actionName, string $method = 'POST', $identifier = NULL, bool $multipart = false)
     {
         parent::__construct("form", true);
-        $this->setID($identifier);
+        if($identifier)
+            $this->setID($identifier);
 
         $this["action"] = $this->actionName = $actionName;
         $this["method"] = $this->method = $method;

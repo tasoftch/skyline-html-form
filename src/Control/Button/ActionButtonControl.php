@@ -58,6 +58,6 @@ class ActionButtonControl extends ButtonControl
 
     public function performAction($data): bool
     {
-        return call_user_func($this->getActionCallback(), $data);
+        return call_user_func($this->getActionCallback(), $data) ? true : false;
     }
 }

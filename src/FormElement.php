@@ -188,21 +188,16 @@ class FormElement extends Element implements ElementInterface
     }
 
     /**
-     * This method tries to find, which control did send the form.
-     * If a control is registered, then the form gets validated and verified.
-     * On success, the action control's action gets performed and this method returns true, otherwise false
+     * Performs the required action, if the form is valid
      *
      * @param Request $request
-     * @param array $feedbacks
      * @return bool
      */
-    public function prepareValidateAndPerform(Request $request, array &$feedbacks): bool {
-        foreach($this->getActionControls() as $control) {
-            if($request->request->has($control->getName())) {
-                $this->setDataFromRequest($request);
-                $feedbacks = $this->validateForm($valid);
-                if($valid == self::FORM_STATE_VALID) {
-                    return $control->performAction( $this->getData() );
+    public function performAction(Request $request): bool {
+        if($this->isValidated() && $this->isValid()) {
+            foreach($this->getActionControls() as $control) {
+                if($request->request->has($control->getName())) {
+                    return $control->performAction( $this->getData() ) ? true : false;
                 }
             }
         }

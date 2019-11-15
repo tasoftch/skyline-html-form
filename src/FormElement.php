@@ -36,6 +36,7 @@ namespace Skyline\HTML\Form;
 
 use Skyline\HTML\Element;
 use Skyline\HTML\ElementInterface;
+use Skyline\HTML\Form\Action\ActionInterface;
 use Skyline\HTML\Form\Control\AbstractControl;
 use Skyline\HTML\Form\Control\ControlInterface;
 use Skyline\HTML\Form\Control\Verification\VerificationControlInterface;
@@ -44,7 +45,6 @@ use Skyline\HTML\Form\Exception\FormValidationException;
 use Skyline\HTML\Form\Feedback\ManualFeedbackInterface;
 use Skyline\HTML\Form\Style\StyleMapInterface;
 use Symfony\Component\HttpFoundation\Request;
-use TASoft\Service\ServiceManager;
 
 class FormElement extends Element implements ElementInterface
 {
@@ -83,13 +83,23 @@ class FormElement extends Element implements ElementInterface
     private $styleClassMap;
 
 
-    public function __construct(string $actionName, string $method = 'POST', $identifier = NULL, bool $multipart = false)
+    /**
+     * FormElement constructor.
+     * @param string|ActionInterface $action
+     * @param string $method
+     * @param null $identifier
+     * @param bool $multipart
+     */
+    public function __construct($action, string $method = 'POST', $identifier = NULL, bool $multipart = false)
     {
         parent::__construct("form", true);
         if($identifier)
             $this->setID($identifier);
 
-        $this["action"] = $this->actionName = $actionName;
+        if($action instanceof ActionInterface)
+            $this->actionName = $action->makeAction($this);
+        else
+            $this["action"] = $this->actionName = (string) $action;
         $this["method"] = $this->method = $method;
         if(($this->multipart = $multipart))
             $this["enctype"] = 'multipart/form-data';

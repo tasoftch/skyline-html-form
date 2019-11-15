@@ -38,6 +38,7 @@ use Skyline\HTML\Element;
 use Skyline\HTML\ElementInterface;
 use Skyline\HTML\Form\Action\ActionInterface;
 use Skyline\HTML\Form\Control\AbstractControl;
+use Skyline\HTML\Form\Control\ActionControlInterface;
 use Skyline\HTML\Form\Control\ControlInterface;
 use Skyline\HTML\Form\Control\Verification\VerificationControlInterface;
 use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
@@ -59,8 +60,8 @@ class FormElement extends Element implements ElementInterface
     const FORM_STATE_NONE = 0;
     const FORM_STATE_VALID = 1;
 
-    /** @var ControlInterface|null */
-    private $actionControl;
+    /** @var ActionControlInterface[]|null */
+    private $actionControls = [];
 
     /** @var ControlInterface|null */
     private $controlFocus;
@@ -176,14 +177,36 @@ class FormElement extends Element implements ElementInterface
      * @see FormElement::getActionButton()
      */
     public function prepareWithRequest(Request $request, array &$feedbacks = NULL): int {
-        if($button = $this->getActionControl()) {
-            if($request->request->has($button->getName())) {
+        foreach($this->getActionControls() as $control) {
+            if($request->request->has($control->getName())) {
                 $this->setDataFromRequest($request);
                 $feedbacks = $this->validateForm($valid);
                 return $valid ? self::FORM_STATE_VALID : self::FORM_STATE_INVALID;
             }
         }
         return self::FORM_STATE_NONE;
+    }
+
+    /**
+     * This method tries to find, which control did send the form.
+     * If a control is registered, then the form gets validated and verified.
+     * On success, the action control's action gets performed and this method returns true, otherwise false
+     *
+     * @param Request $request
+     * @param array $feedbacks
+     * @return bool
+     */
+    public function prepareValidateAndPerform(Request $request, array &$feedbacks): bool {
+        foreach($this->getActionControls() as $control) {
+            if($request->request->has($control->getName())) {
+                $this->setDataFromRequest($request);
+                $feedbacks = $this->validateForm($valid);
+                if($valid == self::FORM_STATE_VALID) {
+                    return $control->performAction( $this->getData() );
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -227,19 +250,33 @@ class FormElement extends Element implements ElementInterface
     }
 
     /**
-     * @return ControlInterface|null
+     * @return ActionControlInterface|null
      */
-    public function getActionControl(): ?ControlInterface
+    public function getActionControl(): ?ActionControlInterface
     {
-        return $this->actionControl;
+        return reset($this->actionControls);
     }
 
     /**
-     * @param ControlInterface|null $actionControl
+     * @param ActionControlInterface|null $actionControl
      */
-    public function setActionControl(?ControlInterface $actionControl): void
+    public function setActionControl(?ActionControlInterface $actionControl): void
     {
-        $this->actionControl = $actionControl;
+        $this->actionControls = [$actionControl];
+    }
+
+    /**
+     * @param ActionControlInterface $actionControl
+     */
+    public function addActionControl(ActionControlInterface $actionControl) {
+        $this->actionControls[] = $actionControl;
+    }
+
+    /**
+     * @return ActionControlInterface[]
+     */
+    public function getActionControls(): array {
+        return $this->actionControls;
     }
 
     /**

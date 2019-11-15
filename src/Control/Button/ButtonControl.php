@@ -37,10 +37,11 @@ namespace Skyline\HTML\Form\Control\Button;
 
 use Skyline\HTML\ElementInterface;
 use Skyline\HTML\Form\Control\AbstractControl;
+use Skyline\HTML\Form\Control\ActionControlInterface;
 use Skyline\HTML\HTMLContentElement;
 use Skyline\Render\Context\RenderContextInterface;
 
-class ButtonControl extends AbstractControl
+class ButtonControl extends AbstractControl implements ActionControlInterface
 {
     const TYPE_SUBMIT = 'submit';
     const TYPE_RESET = 'reset';
@@ -106,5 +107,11 @@ class ButtonControl extends AbstractControl
     protected function skipValidation(): bool
     {
         return true;
+    }
+
+    public function performAction($data): bool
+    {
+        trigger_error("You need to subclass the ButtonControl or use ActionButtonControl instead", E_USER_WARNING);
+        return false;
     }
 }

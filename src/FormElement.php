@@ -297,7 +297,7 @@ class FormElement extends Element implements ElementInterface
         };
 
         foreach($this->getChildElements() as $element) {
-            if($element instanceof ControlInterface) {
+            if($element instanceof ControlInterface && !($element instanceof ActionControlInterface)) {
                 try {
                     if(false === $element->validate())
                         $invalidate($element);

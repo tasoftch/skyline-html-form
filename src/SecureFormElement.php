@@ -50,7 +50,7 @@ class SecureFormElement extends FormElement
 
     /**
      * SecureFormElement constructor.
-     * @param @param string|ActionInterface $action
+     * @param string|ActionInterface $action
      * @param string $method
      * @param null $identifier
      * @param bool $multipart

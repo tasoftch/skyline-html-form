@@ -41,6 +41,8 @@ abstract class AbstractValidator implements ValidatorInterface, ValidatorAwareIn
 {
     /** @var string|null */
     protected $validatorName;
+    /** @var int */
+    protected $tag;
 
     /**
      * @inheritDoc
@@ -48,6 +50,22 @@ abstract class AbstractValidator implements ValidatorInterface, ValidatorAwareIn
     public function getValidatorName(): string
     {
         return $this->validatorName ?? get_class($this);
+    }
+
+    /**
+     * @return int
+     */
+    public function getTag(): int
+    {
+        return $this->tag;
+    }
+
+    /**
+     * @param int $tag
+     */
+    public function setTag(int $tag): void
+    {
+        $this->tag = $tag;
     }
 
 

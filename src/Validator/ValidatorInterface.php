@@ -44,4 +44,11 @@ interface ValidatorInterface
      * @return bool|null
      */
     public function validateValue($value);
+
+    /**
+     * Recognize tag
+     *
+     * @return int
+     */
+    public function getTag(): int;
 }

@@ -181,10 +181,14 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
      * Adds a validator to the control
      *
      * @param ValidatorInterface $validator
+     * @param int $tag
      */
-    public function addValidator(ValidatorInterface $validator) {
-        if(!in_array($validator, $this->validators))
+    public function addValidator(ValidatorInterface $validator, int $tag = 0) {
+        if(!in_array($validator, $this->validators)) {
             $this->validators[] = $validator;
+            if(method_exists($validator, 'setTag'))
+                $validator->setTag($tag);
+        }
     }
 
     /**

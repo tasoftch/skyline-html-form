@@ -35,6 +35,7 @@
 namespace Skyline\HTML\Form;
 
 
+use Skyline\HTML\Form\Action\ActionInterface;
 use Skyline\Security\CSRF\CSRFToken;
 use Skyline\Security\CSRF\CSRFTokenManager;
 use TASoft\Service\ServiceManager;
@@ -47,9 +48,16 @@ class SecureFormElement extends FormElement
     private $CSRFToken;
     private $_sentCsrfToken;
 
-    public function __construct(string $actionName, string $method = 'POST', $identifier = NULL, bool $multipart = false)
+    /**
+     * SecureFormElement constructor.
+     * @param @param string|ActionInterface $action
+     * @param string $method
+     * @param null $identifier
+     * @param bool $multipart
+     */
+    public function __construct($action, string $method = 'POST', $identifier = NULL, bool $multipart = false)
     {
-        parent::__construct($actionName, $method, $identifier, $multipart);
+        parent::__construct($action, $method, $identifier, $multipart);
         /** @var CSRFTokenManager $csrfMan */
         if($csrfMan = ServiceManager::generalServiceManager()->CSRFManager) {
             $this->CSRFToken = $csrfMan->getToken(static::CSRF_TOKEN_NAME);

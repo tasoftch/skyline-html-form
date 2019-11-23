@@ -119,7 +119,7 @@ class SecureFormElement extends FormElement
             $ind = $this->formatOutput() ? ($this->getIndentionString($indention) . "\t") : '';
             $nl = $this->formatOutput() ? PHP_EOL : '';
 
-            $html .= sprintf("$ind<input type=\"hidden\" name=\"hv://%s\" value=\"%s\">$nl", htmlspecialchars( $csrf->getId() ), htmlspecialchars($csrf->getValue()));
+            $html .= sprintf("$ind<input type=\"hidden\" name=\"%s\" value=\"%s\">$nl", htmlspecialchars( $csrf->getId() ), htmlspecialchars($csrf->getValue()));
         }
         return $html;
     }

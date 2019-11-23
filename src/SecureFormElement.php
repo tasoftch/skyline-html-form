@@ -38,6 +38,7 @@ namespace Skyline\HTML\Form;
 use Skyline\HTML\Form\Action\ActionInterface;
 use Skyline\Security\CSRF\CSRFToken;
 use Skyline\Security\CSRF\CSRFTokenManager;
+use Skyline\Security\Exception\AuthenticationException;
 use TASoft\Service\ServiceManager;
 
 class SecureFormElement extends FormElement

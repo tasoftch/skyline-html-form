@@ -499,7 +499,7 @@ class FormElement extends Element implements ElementInterface
      * @return AbstractControl|null
      * @see FormElement::manualBuildForm()
      */
-    public function manualBuildControl(string $name, array $additionalAttributes = [], array $validationClasses = []) {
+    public function manualBuildControl(string $name, array $additionalAttributes = ['class' => 'form-control'], array $validationClasses = ["valid" => 'is-valid', 'invalid' => 'is-invalid']) {
         if(($control = $this->getControlByName($name)) && $control instanceof AbstractControl) {
             $old = [];
             foreach($additionalAttributes as $name => $attrs) {
@@ -540,8 +540,8 @@ class FormElement extends Element implements ElementInterface
             if($control->isValidated()) {
                 foreach ($feedbacks as $feedback) {
                     if(
-                    ($feedback->isValidFeedback() && $control->isValid() && $feedback->matchForValidator( $control->getStoppedValidator() )) ||
-                    (!$feedback->isValidFeedback() && !$control->isValid() && $feedback->matchForValidator( $control->getStoppedValidator() ))
+                        ($feedback->isValidFeedback() && $control->isValid() && $feedback->matchForValidator( $control->getStoppedValidator() )) ||
+                        (!$feedback->isValidFeedback() && !$control->isValid() && $feedback->matchForValidator( $control->getStoppedValidator() ))
                     ) {
                         $feedback->makeOutput();
                         break;

@@ -66,7 +66,7 @@ class IntegralOptionListControl extends OptionListControl
         if(is_iterable($value)) {
             $integral = 0;
             foreach ($value as $v) {
-                if(is_integer($v))
+                if(is_numeric($v))
                     $integral |= $v;
             }
             $value = $integral;

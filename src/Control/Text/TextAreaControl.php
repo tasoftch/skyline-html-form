@@ -62,10 +62,12 @@ class TextAreaControl extends AbstractLabelControl
 
     /**
      * @param string|null $placeholder
+	 * @return static
      */
-    public function setPlaceholder(?string $placeholder): void
+    public function setPlaceholder(?string $placeholder)
     {
         $this->placeholder = $placeholder;
+        return $this;
     }
 
     /**
@@ -78,10 +80,12 @@ class TextAreaControl extends AbstractLabelControl
 
     /**
      * @param bool $readonly
+	 * @return static
      */
-    public function setReadonly(bool $readonly): void
+    public function setReadonly(bool $readonly)
     {
         $this->readonly = $readonly;
+        return $this;
     }
 
     /**
@@ -94,10 +98,12 @@ class TextAreaControl extends AbstractLabelControl
 
     /**
      * @param int $rows
+	 * @return static
      */
-    public function setRows(int $rows): void
+    public function setRows(int $rows)
     {
         $this->rows = $rows;
+        return $this;
     }
 
     protected function buildInitialElement(): ?ElementInterface

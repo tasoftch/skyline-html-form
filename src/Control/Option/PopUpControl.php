@@ -54,12 +54,19 @@ class PopUpControl extends AbstractLabelControl implements OptionValuesInterface
     /** @var OptionProviderInterface|null */
     private $optionProvider;
 
+	/**
+	 * @param string $id
+	 * @param $optionValue
+	 * @param null $optionGroup
+	 * @return static
+	 */
     public function setOption(string $id, $optionValue, $optionGroup = NULL)
     {
         $this->options[$id] = [
             $optionValue,
             $optionGroup
         ];
+        return $this;
     }
 
     public function getOption(string $id, &$optionGroup = NULL)
@@ -81,10 +88,12 @@ class PopUpControl extends AbstractLabelControl implements OptionValuesInterface
 
     /**
      * @param string|null $nullPlaceholder
+	 * @return static
      */
-    public function setNullPlaceholder(?string $nullPlaceholder): void
+    public function setNullPlaceholder(?string $nullPlaceholder)
     {
         $this->nullPlaceholder = $nullPlaceholder;
+        return $this;
     }
 
     /**
@@ -97,10 +106,12 @@ class PopUpControl extends AbstractLabelControl implements OptionValuesInterface
 
     /**
      * @param OptionProviderInterface|null $optionProvider
+	 * @return static
      */
-    public function setOptionProvider(?OptionProviderInterface $optionProvider): void
+    public function setOptionProvider(?OptionProviderInterface $optionProvider)
     {
         $this->optionProvider = $optionProvider;
+        return $this;
     }
 
     protected function getGroupedOptions(): array {

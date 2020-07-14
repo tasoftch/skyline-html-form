@@ -55,9 +55,16 @@ class OptionListControl extends AbstractLabelControl implements OptionValuesInte
     /** @var OptionProviderInterface|null */
     private $optionProvider;
 
+	/**
+	 * @param string $id
+	 * @param $optionValue
+	 * @param null $optionGroup
+	 * @return static
+	 */
     public function setOption(string $id, $optionValue, $optionGroup = NULL)
     {
         $this->options[$id] = $optionValue;
+        return $this;
     }
 
     public function getOption(string $id, &$optionGroup = NULL)
@@ -75,10 +82,12 @@ class OptionListControl extends AbstractLabelControl implements OptionValuesInte
 
     /**
      * @param OptionProviderInterface|null $optionProvider
+	 * @return static
      */
-    public function setOptionProvider(?OptionProviderInterface $optionProvider): void
+    public function setOptionProvider(?OptionProviderInterface $optionProvider)
     {
         $this->optionProvider = $optionProvider;
+        return $this;
     }
 
     protected function buildControl(): ElementInterface

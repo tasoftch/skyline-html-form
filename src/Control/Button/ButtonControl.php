@@ -79,10 +79,12 @@ class ButtonControl extends AbstractControl implements ActionControlInterface
 
     /**
      * @param mixed $content
+	 * @return static
      */
-    public function setContent($content): void
+    public function setContent($content)
     {
         $this->content = $content;
+        return $this;
     }
 
     protected function buildControlElementInstance(): ElementInterface

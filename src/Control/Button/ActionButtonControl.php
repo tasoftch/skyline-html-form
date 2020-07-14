@@ -50,10 +50,12 @@ class ActionButtonControl extends ButtonControl
 
     /**
      * @param callable $actionCallback
+	 * @return static
      */
-    public function setActionCallback(callable $actionCallback): void
+    public function setActionCallback(callable $actionCallback)
     {
         $this->actionCallback = $actionCallback;
+        return $this;
     }
 
     public function performAction($data): bool

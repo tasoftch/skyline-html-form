@@ -57,10 +57,12 @@ class CheckboxControl extends AbstractLabelControl
 
     /**
      * @param mixed $checkableValue
+	 * @return static
      */
-    public function setCheckableValue($checkableValue): void
+    public function setCheckableValue($checkableValue)
     {
         $this->checkableValue = $checkableValue;
+        return $this;
     }
 
     /**
@@ -73,10 +75,12 @@ class CheckboxControl extends AbstractLabelControl
 
     /**
      * @param bool $checked
+	 * @return static
      */
-    public function setChecked(bool $checked): void
+    public function setChecked(bool $checked)
     {
         $this->checked = $checked;
+        return $this;
     }
 
     public function setValue($value): void

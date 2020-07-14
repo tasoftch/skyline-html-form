@@ -104,10 +104,12 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
 
     /**
      * @param bool $required
+	 * @return static
      */
-    public function setRequired(bool $required): void
+    public function setRequired(bool $required)
     {
         $this->required = $required;
+        return $this;
     }
 
     /**
@@ -163,10 +165,12 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
 
     /**
      * @param mixed $defaultValue
+	 * @return static
      */
-    public function setDefaultValue($defaultValue): void
+    public function setDefaultValue($defaultValue)
     {
         $this->defaultValue = $defaultValue;
+        return $this;
     }
 
     /**
@@ -182,6 +186,7 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
      *
      * @param ValidatorInterface $validator
      * @param int $tag
+	 * @return static
      */
     public function addValidator(ValidatorInterface $validator, int $tag = 0) {
         if(!in_array($validator, $this->validators)) {
@@ -189,17 +194,20 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
             if(method_exists($validator, 'setTag'))
                 $validator->setTag($tag);
         }
+        return $this;
     }
 
     /**
      * Removes a validator from control
      *
      * @param ValidatorInterface $validator
+	 * @return static
      */
     public function removeValidator(ValidatorInterface $validator) {
         if(($idx = array_search($validator, $this->validators)) !== false) {
             unset($this->validators[$idx]);
         }
+        return $this;
     }
 
     /**
@@ -287,10 +295,12 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
 
     /**
      * @param string $invalidFeedback
+	 * @return static
      */
-    public function setInvalidFeedback(string $invalidFeedback): void
+    public function setInvalidFeedback(string $invalidFeedback)
     {
         $this->invalidFeedback = $invalidFeedback;
+        return $this;
     }
 
     /**
@@ -303,10 +313,12 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
 
     /**
      * @param string $validFeedback
+	 * @return static
      */
-    public function setValidFeedback(string $validFeedback): void
+    public function setValidFeedback(string $validFeedback)
     {
         $this->validFeedback = $validFeedback;
+        return $this;
     }
 
     /**
@@ -327,10 +339,12 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
 
     /**
      * @param bool $enabled
+	 * @return static
      */
-    public function setEnabled(bool $enabled): void
+    public function setEnabled(bool $enabled)
     {
         $this->enabled = $enabled;
+        return $this;
     }
 
     /**

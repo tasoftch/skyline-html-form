@@ -63,10 +63,12 @@ class FileInputControl extends TextFieldControl
 
     /**
      * @param bool $multiple
+	 * @return static
      */
-    public function setMultiple(bool $multiple): void
+    public function setMultiple(bool $multiple)
     {
         $this->multiple = $multiple;
+        return $this;
     }
 
     /**
@@ -79,10 +81,12 @@ class FileInputControl extends TextFieldControl
 
     /**
      * @param array|null $allowedTypes
+	 * @return static
      */
-    public function setAllowedTypes(?array $allowedTypes): void
+    public function setAllowedTypes(?array $allowedTypes)
     {
         $this->allowedTypes = $allowedTypes;
+        return $this;
     }
 
     protected function buildControl(): ElementInterface

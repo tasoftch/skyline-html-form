@@ -78,10 +78,12 @@ class TextFieldControl extends AbstractLabelControl
 
     /**
      * @param bool $readonly
+	 * @return static
      */
     public function setReadonly(bool $readonly)
     {
         $this->readonly = $readonly;
+        return $this;
     }
 
     /**
@@ -94,10 +96,12 @@ class TextFieldControl extends AbstractLabelControl
 
     /**
      * @param null|string $placeholder
+	 * @return static
      */
-    public function setPlaceholder(?string $placeholder): void
+    public function setPlaceholder(?string $placeholder)
     {
         $this->placeholder = $placeholder;
+        return $this;
     }
 
     /**

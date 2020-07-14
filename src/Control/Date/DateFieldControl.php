@@ -63,10 +63,12 @@ class DateFieldControl extends TextFieldControl
 
     /**
      * @param string $dateObjectClass
+	 * @return static
      */
-    public function setDateObjectClass(string $dateObjectClass): void
+    public function setDateObjectClass(string $dateObjectClass)
     {
         $this->dateObjectClass = $dateObjectClass;
+        return $this;
     }
 
     /**
@@ -79,10 +81,12 @@ class DateFieldControl extends TextFieldControl
 
     /**
      * @param string $dateFormat
+	 * @return static
      */
-    public function setDateFormat(string $dateFormat): void
+    public function setDateFormat(string $dateFormat)
     {
         $this->dateFormat = $dateFormat;
+        return $this;
     }
 
     public function setValue($value): void

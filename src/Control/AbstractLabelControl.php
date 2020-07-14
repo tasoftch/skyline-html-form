@@ -55,10 +55,12 @@ abstract class AbstractLabelControl extends AbstractControl
 
     /**
      * @param string $label
+	 * @return static
      */
-    public function setLabel(string $label): void
+    public function setLabel(string $label)
     {
         $this->label = $label;
+        return $this;
     }
 
     /**
@@ -71,10 +73,12 @@ abstract class AbstractLabelControl extends AbstractControl
 
     /**
      * @param mixed $description
+	 * @return static
      */
-    public function setDescription($description): void
+    public function setDescription($description)
     {
         $this->description = $description;
+        return $this;
     }
 
     /**

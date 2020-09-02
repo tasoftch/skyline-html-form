@@ -122,10 +122,12 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
 
     /**
      * @param FormElement|null $form
+	 * @return static
      */
-    public function setForm(?FormElement $form): void
+    public function setForm(?FormElement $form)
     {
         $this->form = $form;
+        return $this;
     }
 
     /**
@@ -140,11 +142,13 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
 
     /**
      * @param mixed $value
+	 * @return static
      */
-    public function setValue($value): void
+    public function setValue($value)
     {
         $this->defaultValueUsed = false;
         $this->value = $value;
+        return $this;
     }
 
     /**

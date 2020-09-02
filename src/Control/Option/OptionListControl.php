@@ -55,6 +55,12 @@ class OptionListControl extends AbstractLabelControl implements OptionValuesInte
     /** @var OptionProviderInterface|null */
     private $optionProvider;
 
+    public $classMap = [
+    	'option-list' => '',
+		'option-container' => '',
+		'input' => ''
+	];
+
 	/**
 	 * @param string $id
 	 * @param $optionValue
@@ -93,7 +99,7 @@ class OptionListControl extends AbstractLabelControl implements OptionValuesInte
     protected function buildControl(): ElementInterface
     {
         $control = new Element("div");
-        $control["class"] = 'option-list';
+        $control["class"] = $this->classMap["option-list"] ?? '';
 
         if($op = $this->getOptionProvider())
             $options = $op->yieldOptions($grp);
@@ -110,7 +116,7 @@ class OptionListControl extends AbstractLabelControl implements OptionValuesInte
 
     protected function buildOptionElement($optionID, $optionValue): ElementInterface {
         $e = new Element("div");
-        $e["class"] = 'option-item';
+        $e["class"] = $this->classMap["option-container"] ?? '';
 
         $e->appendElement($this->buildOptionInput($optionID, $optionValue));
         $e->appendElement($this->buildOptionLabel($optionID, $optionValue));
@@ -120,6 +126,8 @@ class OptionListControl extends AbstractLabelControl implements OptionValuesInte
 
     protected function buildOptionInput($optionID, $optionValue): ElementInterface {
         $input = new Element("input", false);
+        $input["class"] = $this->classMap["input"] ?? '';
+
         if(!$this->isEnabled())
             $input["disabled"] = 'disabled';
 

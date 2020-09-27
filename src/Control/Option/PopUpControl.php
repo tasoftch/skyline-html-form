@@ -130,8 +130,11 @@ class PopUpControl extends AbstractLabelControl implements OptionValuesInterface
             }
         }
 
-        foreach($options as $group => &$option)
-            asort($option);
+        foreach($options as $group => &$option) {
+        	if($group)
+				asort($option);
+		}
+
 
         return $options;
     }

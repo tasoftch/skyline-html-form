@@ -197,12 +197,37 @@ class FormElement extends Element implements ElementInterface
         if($this->isValidated() && $this->isValid()) {
             foreach($this->getActionControls() as $control) {
                 if($request->request->has($control->getName())) {
-                    return $control->performAction( $this->getData() ) ? true : false;
+                    return $control->performAction( $this->getData() );
                 }
             }
         }
         return false;
     }
+
+	/**
+	 * Calling this method validates the form and if valid, it performs the action by the pressed action button.
+	 *
+	 *
+	 * @param Request $request
+	 * @param callable|null $defaultValuesHandler Invoked, if the form was loaded the first time, still without passed values yet. Signature: function(): array => expecting the form data.
+	 * @param callable|null $failedHandler
+	 */
+    public function evaluateWithRequest(Request $request, callable $defaultValuesHandler = NULL, callable $failedHandler = NULL) {
+    	switch ( $this->prepareWithRequest($request, $feedbacks) ) {
+			case static::FORM_STATE_VALID:
+				return $this->performAction($request);
+			case static::FORM_STATE_INVALID:
+				if($failedHandler)
+					return call_user_func($failedHandler, $this->getData(), $feedbacks) ? true : false;
+				return false;
+			default:
+				if($defaultValuesHandler) {
+					if(is_array( $data = call_user_func($defaultValuesHandler) ))
+						$this->setData($data);
+				}
+		}
+		return true;
+	}
 
     /**
      * Reads the data from a request that was submitted by the form

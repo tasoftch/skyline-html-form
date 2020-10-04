@@ -40,6 +40,8 @@ use Skyline\HTML\Form\Action\ActionInterface;
 use Skyline\HTML\Form\Control\AbstractControl;
 use Skyline\HTML\Form\Control\ActionControlInterface;
 use Skyline\HTML\Form\Control\ControlInterface;
+use Skyline\HTML\Form\Control\ExportControlInterface;
+use Skyline\HTML\Form\Control\ImportControlInterface;
 use Skyline\HTML\Form\Control\Verification\VerificationControlInterface;
 use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
 use Skyline\HTML\Form\Exception\FormValidationException;
@@ -218,12 +220,12 @@ class FormElement extends Element implements ElementInterface
 				return $this->performAction($request);
 			case static::FORM_STATE_INVALID:
 				if($failedHandler)
-					return call_user_func($failedHandler, $this->getData(), $feedbacks) ? true : false;
+					return call_user_func($failedHandler, $this->getData(true), $feedbacks) ? true : false;
 				return false;
 			default:
 				if($defaultValuesHandler) {
 					if(is_array( $data = call_user_func($defaultValuesHandler) ))
-						$this->setData($data);
+						$this->setData($data, true);
 				}
 		}
 		return true;
@@ -349,15 +351,18 @@ class FormElement extends Element implements ElementInterface
         return $list;
     }
 
-    /**
-     * Sets the form data
-     *
-     * @param iterable $data
-     */
-    public function setData($data) {
+	/**
+	 * Sets the form data
+	 *
+	 * @param iterable $data
+	 * @param bool $imports
+	 */
+    public function setData($data, bool $imports = false) {
         if(is_iterable($data)) {
             foreach($data as $key => $value) {
                 if($element = $this->getControlByName($key)) {
+                	if($imports && $element instanceof ImportControlInterface && $element->importValue($value))
+                		continue;
                     $element->setValue($value);
                 }
                 elseif($this[ $key ] ?? NULL) {
@@ -367,14 +372,20 @@ class FormElement extends Element implements ElementInterface
         }
     }
 
-    public function getData() {
+	/**
+	 * @param bool $exports
+	 * @return array
+	 */
+    public function getData(bool $exports = false) {
         $list = [];
         foreach($this->getAttributes() as $name => $value) {
             $list[$name] = $value;
         }
 
         foreach($this->getChildElements() as $name => $element) {
-            if($element instanceof ControlInterface)
+        	if($exports && $element instanceof ExportControlInterface)
+				$list[ $element->getName() ] = $element->exportValue();
+            elseif($element instanceof ControlInterface)
                 $list[ $element->getName() ] = $element->getValue();
         }
         return $list;

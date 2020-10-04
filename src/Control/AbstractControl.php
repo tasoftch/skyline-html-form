@@ -83,6 +83,8 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
     private $validated = false;
     /** @var ValidatorInterface|null */
     private $stoppedValidator;
+    /** @var null|bool|FormValidationException */
+    private $stoppedValidationReason;
 
     private $validFeedback = "";
     private $invalidFeedback = '';
@@ -248,14 +250,16 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
                 if($validator->validateValue($value) === false) {
                     $this->valid = false;
                     $this->stoppedValidator = $validator;
+                    $this->stoppedValidator = false;
                     return false;
                 }
             } catch (FormValidationException $exception) {
                 $this->valid = false;
                 $this->stoppedValidator = $validator;
+                $this->stoppedValidationReason = $exception;
                 throw $exception;
             } catch (_InternOptionalCancelException $exception) {
-                $this->valid = $exception->success;
+                $this->stoppedValidationReason = $this->valid = $exception->success;
                 $this->stoppedValidator = $validator;
                 throw $exception;
             }
@@ -288,6 +292,14 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
     {
         return $this->stoppedValidator;
     }
+
+	/**
+	 * @return bool|FormValidationException|null
+	 */
+	public function getStoppedValidationReason()
+	{
+		return $this->stoppedValidationReason;
+	}
 
     /**
      * @return string

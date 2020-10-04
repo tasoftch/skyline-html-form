@@ -211,10 +211,10 @@ class FormElement extends Element implements ElementInterface
 	 *
 	 *
 	 * @param Request $request
-	 * @param callable|null $defaultValuesHandler Invoked, if the form was loaded the first time, still without passed values yet. Signature: function(): array => expecting the form data.
+	 * @param array|callable|iterable|null $defaultValuesHandler Invoked, if the form was loaded the first time, still without passed values yet. Signature: function(): array => expecting the form data.
 	 * @param callable|null $failedHandler
 	 */
-    public function evaluateWithRequest(Request $request, callable $defaultValuesHandler = NULL, callable $failedHandler = NULL) {
+    public function evaluateWithRequest(Request $request, $defaultValuesHandler = NULL, callable $failedHandler = NULL) {
     	switch ( $this->prepareWithRequest($request, $feedbacks) ) {
 			case static::FORM_STATE_VALID:
 				return $this->performAction($request);
@@ -223,9 +223,15 @@ class FormElement extends Element implements ElementInterface
 					return call_user_func($failedHandler, $this->getData(true), $feedbacks) ? true : false;
 				return false;
 			default:
+				repeat:
 				if($defaultValuesHandler) {
-					if(is_array( $data = call_user_func($defaultValuesHandler) ))
-						$this->setData($data, true);
+					if(is_callable($defaultValuesHandler)) {
+						$defaultValuesHandler = call_user_func($defaultValuesHandler);
+						goto repeat;
+					}
+
+					if(is_iterable($defaultValuesHandler))
+						$this->setData($defaultValuesHandler, true);
 				}
 		}
 		return true;

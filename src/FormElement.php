@@ -199,7 +199,7 @@ class FormElement extends Element implements ElementInterface
         if($this->isValidated() && $this->isValid()) {
             foreach($this->getActionControls() as $control) {
                 if($request->request->has($control->getName())) {
-                    return $control->performAction( $this->getData() );
+                    return $control->performAction( $this->getData(true) );
                 }
             }
         }
@@ -220,7 +220,7 @@ class FormElement extends Element implements ElementInterface
 				return $this->performAction($request);
 			case static::FORM_STATE_INVALID:
 				if($failedHandler)
-					return call_user_func($failedHandler, $this->getData(true), $feedbacks) ? true : false;
+					return call_user_func($failedHandler, $this->getData(), $feedbacks) ? true : false;
 				return false;
 			default:
 				repeat:

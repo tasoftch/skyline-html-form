@@ -65,7 +65,7 @@ class SecureFormElement extends FormElement
         }
     }
 
-    public function setData($data)
+    public function setData($data, bool $imports = false)
     {
         if(is_iterable($data)) {
             if($csrf = $this->getCSRFToken()) {
@@ -79,7 +79,7 @@ class SecureFormElement extends FormElement
                 }
             }
         }
-        parent::setData($data);
+        parent::setData($data, $imports);
     }
 
     /**

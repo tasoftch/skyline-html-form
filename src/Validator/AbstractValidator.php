@@ -62,10 +62,12 @@ abstract class AbstractValidator implements ValidatorInterface, ValidatorAwareIn
 
     /**
      * @param int $tag
+	 * @return static
      */
-    public function setTag(int $tag): void
+    public function setTag(int $tag)
     {
         $this->tag = $tag;
+        return $this;
     }
 
 

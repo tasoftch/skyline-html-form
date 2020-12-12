@@ -286,9 +286,9 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
     }
 
     /**
-     * @return ValidatorInterface|null
+     * @return ValidatorInterface|string|null
      */
-    public function getStoppedValidator(): ?ValidatorInterface
+    public function getStoppedValidator()
     {
         return $this->stoppedValidator;
     }

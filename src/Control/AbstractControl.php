@@ -250,7 +250,6 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
                 if($validator->validateValue($value) === false) {
                     $this->valid = false;
                     $this->stoppedValidator = $validator;
-                    $this->stoppedValidator = false;
                     return false;
                 }
             } catch (FormValidationException $exception) {

@@ -54,6 +54,26 @@ class PopUpControl extends AbstractLabelControl implements OptionValuesInterface
     /** @var OptionProviderInterface|null */
     private $optionProvider;
 
+    private $shouldOrderOptions = false;
+
+	/**
+	 * @return bool
+	 */
+	public function shouldOrderOptions(): bool
+	{
+		return $this->shouldOrderOptions;
+	}
+
+	/**
+	 * @param bool $shouldOrderOptions
+	 * @return static
+	 */
+	public function setShouldOrderOptions(bool $shouldOrderOptions)
+	{
+		$this->shouldOrderOptions = $shouldOrderOptions;
+		return $this;
+	}
+
 	/**
 	 * @param string $id
 	 * @param $optionValue
@@ -130,9 +150,11 @@ class PopUpControl extends AbstractLabelControl implements OptionValuesInterface
             }
         }
 
-        foreach($options as $group => &$option) {
-        	if($group)
-				asort($option);
+		if($this->shouldOrderOptions()) {
+			foreach($options as $group => &$option) {
+				if($group)
+					asort($option);
+			}
 		}
 
 

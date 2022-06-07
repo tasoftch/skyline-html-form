@@ -99,9 +99,9 @@ class OptionListControl extends AbstractLabelControl implements OptionValuesInte
     protected function buildControl(): ElementInterface
     {
         $control = new Element("div");
-        $control["class"] = $this->classMap["option-list"] ?? '';
+		$control["class"] = $this["class"] ?: $this->classMap["option-list"];
 
-        if($op = $this->getOptionProvider())
+		if($op = $this->getOptionProvider())
             $options = $op->yieldOptions($grp);
         else
             $options = $this->options;

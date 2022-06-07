@@ -56,7 +56,7 @@ class OptionListControl extends AbstractLabelControl implements OptionValuesInte
     private $optionProvider;
 
     public $classMap = [
-    	'option-list' => '',
+    	'option-list' => 'form-control pt-1',
 		'option-container' => '',
 		'input' => ''
 	];
@@ -145,6 +145,7 @@ class OptionListControl extends AbstractLabelControl implements OptionValuesInte
         $label = new TextContentElement("label", $optionValue);
         $label->setSkipInlineFormat(true);
         $label["for"] = $this->getID() . "-$optionID";
+        $label["class"] = "mb-0 ml-1";
         return $label;
     }
 }

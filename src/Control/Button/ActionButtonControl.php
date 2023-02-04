@@ -35,6 +35,8 @@
 namespace Skyline\HTML\Form\Control\Button;
 
 
+use Skyline\HTML\ElementInterface;
+
 class ActionButtonControl extends ButtonControl
 {
     /** @var callable */
@@ -64,7 +66,14 @@ class ActionButtonControl extends ButtonControl
         return $this;
     }
 
-    public function performAction($data): bool
+	protected function buildControl(): ElementInterface
+	{
+		$control = parent::buildControl();
+		$control["onclick"] = "this.form.submitted=this";
+		return $control;
+	}
+
+	public function performAction($data): bool
     {
         return call_user_func($this->getActionCallback(), $data) ? true : false;
     }

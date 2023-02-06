@@ -13,13 +13,13 @@
     }
   },
   "require" : {
-    "php": ">=7.2",
+    "php": "^8",
     "ext-pdo" : "*",
-    "skyline/html-elements": "^0.8"
+    "skyline/html-elements": "^8"
   },
   "require-dev": {
-    "phpunit/phpunit": "^6",
-    "skyline/security": "^0.8",
+    "phpunit/phpunit": "^9",
+    "skyline/security": "^8",
     "tasoft/php-pdo": "^0.7"
   },
   "suggest": {

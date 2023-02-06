@@ -69,7 +69,7 @@ class ExactLengthValidator extends AbstractComparisonValidator
      */
     protected function getValueState($value) {
         if (function_exists("mb_strlen"))
-            return mb_strlen($value);
+            return mb_strlen($value ?: "");
         return strlen($value);
     }
 

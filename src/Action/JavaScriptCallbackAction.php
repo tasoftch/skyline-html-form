@@ -1,8 +1,8 @@
 <?php
-/**
+/*
  * BSD 3-Clause License
  *
- * Copyright (c) 2019, TASoft Applications
+ * Copyright (c) 2023, TASoft Applications
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,65 +29,37 @@
  * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
  */
 
-/**
- * FormTest.php
- * skyline-html-form
- *
- * Created on 2019-09-25 19:36 by thomas
- */
+namespace Skyline\HTML\Form\Action;
 
-use PHPUnit\Framework\TestCase;
-use Skyline\HTML\Form\Action\JavaScriptCallbackAction;
-use Skyline\HTML\Form\Control\Button\ActionButtonControl;
-use Skyline\HTML\Form\Control\Text\TextFieldControl;
 use Skyline\HTML\Form\FormElement;
-use Skyline\HTML\Form\Validator\ExactLengthValidator;
 
-class FormTest extends TestCase
+class JavaScriptCallbackAction implements ActionInterface
 {
-    public function testForm() {
-        $form = new FormElement("", 'post', 'identifier');
+	/** @var string */
+	private $callbackName;
 
-        $form->setHiddenValue("info", 78);
+	/**
+	 * @param string $callbackName
+	 */
+	public function __construct(string $callbackName)
+	{
+		$this->callbackName = $callbackName;
+	}
 
-        $tf = new TextFieldControl("name");
-        $form->appendElement($tf);
+	public function makeAction(FormElement $form)
+	{
+		$form["action"] = "";
+		$form["onsubmit"] = 'return false;';
+		return "@cb-" . $this->getCallbackName();
+	}
 
-        $tf->setValidFeedback("OK");
-        $tf->setInvalidFeedback("Not OK");
-
-        $tf->setLabel("Name:");
-        $tf->setDescription("Your name");
-
-        $tf->addValidator(new ExactLengthValidator(23));
-
-        $list = $form->validateForm($valid);
-        print_r($list);
-
-
-        $form->focusControl($tf);
-        echo $form->getRenderable()(NULL);
-    }
-
-	public function testJavascriptCallback() {
-		$form = new FormElement(new JavaScriptCallbackAction("do_stuff"), 'post');
-
-		$form->addActionControl(
-			(new ActionButtonControl("apply", function() {}))
-		);
-		$form->addActionControl(
-			(new ActionButtonControl("apply13", function() {}))
-		);
-
-		$form->manualBuildForm(function() {
-		});
-
-		$xml = simplexml_load_string($this->getActualOutput());
-
-		$this->assertEmpty($xml["action"]);
-		$this->assertEquals("return false;", $xml["onsubmit"]);
+	/**
+	 * @return string
+	 */
+	public function getCallbackName(): string
+	{
+		return $this->callbackName;
 	}
 }

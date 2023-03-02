@@ -211,7 +211,7 @@ class FormElement extends Element implements ElementInterface
 	 *
 	 *
 	 * @param Request $request
-	 * @param array|callable|iterable|null $defaultValuesHandler Invoked, if the form was loaded the first time, still without passed values yet. Signature: function(): array => expecting the form data.
+	 * @param iterable|callable|array|null $defaultValuesHandler Invoked, if the form was loaded the first time, still without passed values yet. Signature: function(): array => expecting the form data.
 	 * @param callable|null $failedHandler
 	 */
     public function evaluateWithRequest(Request $request, $defaultValuesHandler = NULL, callable $failedHandler = NULL) {
@@ -625,6 +625,12 @@ class FormElement extends Element implements ElementInterface
             $attr = "hv://$attr";
             $html .= sprintf("$ind<input type=\"hidden\" name=\"%s\" value=\"%s\">$nl", htmlspecialchars($attr), htmlspecialchars($value));
         }
+
+		// This is a workaround because some browsers do not send the name of pressed submit button.
+		if(count($this->getActionControls()) == 1) {
+			$html .= sprintf("$ind<input type='hidden' value='%s' value='1'>", htmlspecialchars($this->getActionControls()[0]->getName()));
+		}
+
         return $html;
     }
 
@@ -633,10 +639,48 @@ class FormElement extends Element implements ElementInterface
      */
     protected function stringifyEnd(int $indention = 0): string
     {
-        $html = parent::stringifyEnd($indention);
+		$html = "";
+		if(strpos($this->actionName, '@cb-') === 0) {
+			$controls = [];
+
+			static $submit_count = 1;
+
+			$fn = "submit_$submit_count";
+			$submit_count++;
+
+			foreach($this->getActionControls() as $control) {
+				$controls[] = sprintf("$('#%s, [name=\"%s\"]')[0].onclick = function() {return $fn(this)};", $control->getID(), htmlspecialchars($control->getName()));
+			}
+
+			if($controls) {
+				$controls = join("\n", $controls);
+
+				$cb = substr($this->actionName, 4);
+
+				$html .=<<<EOT
+<script type="application/javascript">
+	function $fn(sender) {
+        const fd = new FormData( sender.form );
+        fd.append(sender.name, '');
+        $cb(fd, sender);
+        return false;
+	}
+$controls
+</script>
+
+EOT;
+
+			}
+
+		}
+
+        $html .= parent::stringifyEnd($indention);
         if($focus = $this->getControlInFocus()) {
             $html .= "<script type='application/javascript'>document.getElementById('". $focus->getID() . "').focus();</script>";
         }
+
+
+
         return $html;
     }
 }

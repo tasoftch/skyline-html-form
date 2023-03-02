@@ -93,7 +93,7 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
     {
         parent::__construct();
         $this->name = $name;
-        $this["id"] = is_string($identifier) ? $identifier : uniqid("ctrl_");
+        $this["id"] = is_string($identifier) ? $identifier : trim(preg_replace("/[^a-z0-9\-\[\]]+/i", '-', $name), "\ \t\n\r\0\x0B[]");
     }
 
     /**

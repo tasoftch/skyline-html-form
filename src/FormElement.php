@@ -42,6 +42,7 @@ use Skyline\HTML\Form\Control\ActionControlInterface;
 use Skyline\HTML\Form\Control\ControlInterface;
 use Skyline\HTML\Form\Control\ExportControlInterface;
 use Skyline\HTML\Form\Control\ImportControlInterface;
+use Skyline\HTML\Form\Control\Render\LiveFormControlRenderInterface;
 use Skyline\HTML\Form\Control\Verification\VerificationControlInterface;
 use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
 use Skyline\HTML\Form\Exception\FormValidationException;
@@ -85,6 +86,8 @@ class FormElement extends Element implements ElementInterface
      */
     private $styleClassMap;
 
+	/** @var LiveFormControlRenderInterface|null */
+	private $liveFormRender;
 
     /**
      * FormElement constructor.
@@ -559,9 +562,14 @@ class FormElement extends Element implements ElementInterface
                 }
             }
 
-            (function()use($control){
-                /** @noinspection Annotator */
-                echo $control->buildControl();})->bindTo($control, get_class($control))();
+			$lfr = $this->getLiveFormRender();
+			if($lfr && $lfr->hasTemplateAvailable()) {
+				$lfr->renderTemplateUsingControl($control);
+			} else {
+				(function()use($control){
+					/** @noinspection Annotator */
+					echo $control->buildControl();})->bindTo($control, get_class($control))();
+			}
 
             foreach($old as $name => $attrs) {
                 $control[$name] = $attrs;
@@ -683,4 +691,22 @@ EOT;
 
         return $html;
     }
+
+	/**
+	 * @return LiveFormControlRenderInterface|null
+	 */
+	public function getLiveFormRender(): ?LiveFormControlRenderInterface
+	{
+		return $this->liveFormRender;
+	}
+
+	/**
+	 * @param LiveFormControlRenderInterface|null $liveFormRender
+	 * @return static
+	 */
+	public function setLiveFormRender(?LiveFormControlRenderInterface $liveFormRender)
+	{
+		$this->liveFormRender = $liveFormRender;
+		return $this;
+	}
 }

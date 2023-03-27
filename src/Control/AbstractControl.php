@@ -41,6 +41,7 @@ use Skyline\HTML\ElementInterface;
 use Skyline\HTML\Form\Exception\_InternOptionalCancelException;
 use Skyline\HTML\Form\Exception\FormValidationException;
 use Skyline\HTML\Form\FormElement;
+use Skyline\HTML\Form\Transformer\ValueTransformerInterface;
 use Skyline\HTML\Form\Validator\Condition\ConditionInterface;
 use Skyline\HTML\Form\Validator\ValidatorInterface;
 use Skyline\HTML\TextContentElement;
@@ -58,6 +59,7 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
     private $defaultValue;
     private $defaultValueUsed = true;
     private $validators = [];
+	private $transformers = [];
 
     /** @var bool  */
     private $enabled = true;
@@ -187,6 +189,13 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         return $this->validators;
     }
 
+	/**
+	 * @return ValueTransformerInterface[]
+	 */
+	public function getValueTransformers(): array {
+		return $this->transformers;
+	}
+
     /**
      * Adds a validator to the control
      *
@@ -203,18 +212,37 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
         return $this;
     }
 
-    /**
-     * Removes a validator from control
-     *
-     * @param ValidatorInterface $validator
+	/**
+	 * Removes a validator from control
+	 *
+	 * @param ValidatorInterface $validator
 	 * @return static
-     */
-    public function removeValidator(ValidatorInterface $validator) {
-        if(($idx = array_search($validator, $this->validators)) !== false) {
-            unset($this->validators[$idx]);
-        }
-        return $this;
-    }
+	 */
+	public function removeValidator(ValidatorInterface $validator) {
+		if(($idx = array_search($validator, $this->validators)) !== false) {
+			unset($this->validators[$idx]);
+		}
+		return $this;
+	}
+
+	/**
+	 * Adds a new transformer to the control.
+	 *
+	 * @param ValueTransformerInterface $transformer
+	 * @return static
+	 */
+	public function addValueTransformer(ValueTransformerInterface $transformer) {
+		if(!in_array($transformer, $this->transformers))
+			$this->transformers[] = $transformer;
+		return $this;
+	}
+
+	public function removeValueTransformer(ValueTransformerInterface $transformer) {
+		if(($idx = array_search($transformer, $this->transformers)) !== false) {
+			unset($this->transformers[$idx]);
+		}
+		return $this;
+	}
 
     /**
      * @inheritDoc
@@ -236,6 +264,14 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
             return true;
 
         $value = $this->getValue();
+
+		/** @var ValueTransformerInterface $transformer */
+		foreach($this->transformers as $transformer) {
+			$value = $transformer->getTransformedValue( $value );
+			if($transformer->overwritesTransformedValue())
+				$this->setValue( $value );
+		}
+
         $this->validated = true;
         $this->valid = true;
 

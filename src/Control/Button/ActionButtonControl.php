@@ -42,7 +42,12 @@ class ActionButtonControl extends ButtonControl
     /** @var callable */
     private $actionCallback;
 
-    public function __construct(string $name, callable $actionCallback = NULL, string $identifier = NULL)
+	public static function create(string $name, string $identifier = NULL, callable $actionCallback = NULL)
+	{
+		return new static($name, $actionCallback, $identifier);
+	}
+
+	public function __construct(string $name, callable $actionCallback = NULL, string $identifier = NULL)
 	{
 		parent::__construct($name, static::TYPE_SUBMIT, $identifier);
 		$this->actionCallback = $actionCallback;

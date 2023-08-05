@@ -91,6 +91,18 @@ abstract class AbstractControl extends AbstractInlineBuildElement implements Con
     private $validFeedback = "";
     private $invalidFeedback = '';
 
+	/**
+	 * Construction helper method for fluent configuration
+	 *
+	 * @param string $name
+	 * @param string|NULL $identifier
+	 * @return static
+	 */
+	public static function create(string $name, string $identifier = NULL)
+	{
+		return new static($name, $identifier);
+	}
+
     public function __construct(string $name, string $identifier = NULL)
     {
         parent::__construct();

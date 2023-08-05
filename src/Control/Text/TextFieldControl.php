@@ -62,7 +62,12 @@ class TextFieldControl extends AbstractLabelControl
     /** @var string  */
     private $type;
 
-    public function __construct(string $name, string $id = NULL, string $type = self::TYPE_TEXT)
+	public static function create(string $name, string $identifier = NULL, string $type = self::TYPE_TEXT)
+	{
+		return new static($name, $identifier, $type);
+	}
+
+	public function __construct(string $name, string $id = NULL, string $type = self::TYPE_TEXT)
     {
         parent::__construct($name, $id);
         $this->type = $type;

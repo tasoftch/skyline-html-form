@@ -45,7 +45,12 @@ class FileInputControl extends TextFieldControl
     /** @var array | null */
     private $allowedTypes;
 
-    /**
+	public static function create(string $name, string $identifier = NULL, string $type = self::TYPE_TEXT)
+	{
+		return parent::create($name, $identifier, 'file');
+	}
+
+	/**
      * @inheritDoc
      */
     public function __construct(string $name, string $id = NULL)

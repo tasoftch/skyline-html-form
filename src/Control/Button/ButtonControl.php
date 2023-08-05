@@ -50,7 +50,12 @@ class ButtonControl extends AbstractControl implements ActionControlInterface
     /** @var string */
     private $type;
 
-    public function __construct(string $name, string $type = self::TYPE_CUSTOM, string $identifier = NULL)
+	public static function create(string $name, string $identifier = NULL)
+	{
+		return new static($name, self::TYPE_CUSTOM, $identifier);
+	}
+
+	public function __construct(string $name, string $type = self::TYPE_CUSTOM, string $identifier = NULL)
     {
         parent::__construct($name, $identifier);
         $this->type = $type;

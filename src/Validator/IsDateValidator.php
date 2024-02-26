@@ -45,6 +45,8 @@ class IsDateValidator extends AbstractConditionalValidator
 	 */
 	public function validateValue($value)
 	{
+		if($value instanceof \DateTime)
+			return true;
 		try {
 			@ new Date($value);
 			return true;
